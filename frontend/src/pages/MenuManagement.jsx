@@ -353,20 +353,6 @@ export default function MenuManagement() {
               <p className="text-xs text-gray-500">Optional full portion price</p>
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Full Price (₹)</label>
-              <input
-                name="fullPrice"
-                type="number"
-                min="0"
-                step="0.01"
-                className="input"
-                placeholder="0.00"
-                value={form.fullPrice}
-                onChange={handleChange}
-              />
-              <p className="text-xs text-gray-500">Optional full portion price</p>
-            </div>
-            <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Item Image (optional)</label>
               <input type="file" accept="image/*" onChange={handleImageChange} className="block w-full text-sm text-gray-600" />
               {imagePreview && (
