@@ -12,13 +12,7 @@ import {
   Download,
   AlertCircle,
   CheckCircle,
-  PieChart,
-  Activity,
 } from "lucide-react";
-import {
-  Doughnut as DoughnutChart,
-  Line as LineChart,
-} from "react-chartjs-2";
 import { formatCurrency } from "../utils/format";
 
 export default function Dashboard() {
@@ -32,9 +26,6 @@ export default function Dashboard() {
   const [cart, setCart] = useState([]);
   const [printing, setPrinting] = useState(false);
   const [billPreview, setBillPreview] = useState(null);
-  const [categorySales, setCategorySales] = useState([]);
-  const [dailySales, setDailySales] = useState([]);
-  const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,27 +42,10 @@ export default function Dashboard() {
       setBusiness(bRes.data.business);
       setCategories(cRes.data.categories);
       setMenuItems(mRes.data.menuItems);
-      loadAnalytics();
     } catch (err) {
       toast.error("Failed to load data");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadAnalytics = async () => {
-    try {
-      setAnalyticsLoading(true);
-      const [catRes, dailyRes] = await Promise.all([
-        api.get("/bills/analytics/category-sales"),
-        api.get("/bills/analytics/daily-sales"),
-      ]);
-      setCategorySales(catRes.data.categorySales || []);
-      setDailySales(dailyRes.data.dailySales || []);
-    } catch (err) {
-      // Analytics may fail if no bills yet - that's ok
-    } finally {
-      setAnalyticsLoading(false);
     }
   };
 
@@ -200,118 +174,6 @@ export default function Dashboard() {
           </button>
         </div>
       </header>
-
-      {/* Analytics Section */}
-      <div className="card p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <PieChart className="w-5 h-5 text-indigo-600" /> Business Analysis
-          </h2>
-          {!analyticsLoading && categorySales.length > 0 && (
-            <span className="text-xs text-gray-500">Based on generated bills</span>
-          )}
-        </div>
-
-        {/* Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white p-4 rounded-xl border border-gray-200">
-            <div className="text-xs text-gray-500 uppercase font-medium">Total Bills</div>
-            <div className="text-2xl font-bold text-gray-900">
-              {categorySales.reduce((sum, c) => sum + c.billCount, 0)}
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-gray-200">
-            <div className="text-xs text-gray-500 uppercase font-medium">Total Items Sold</div>
-            <div className="text-2xl font-bold text-gray-900">
-              {categorySales.reduce((sum, c) => sum + c.totalQuantity, 0)}
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-gray-200">
-            <div className="text-xs text-gray-500 uppercase font-medium">Grand Total Sales</div>
-            <div className="text-2xl font-bold text-gray-900">
-              {formatCurrency(categorySales.reduce((sum, c) => sum + c.totalSales, 0))}
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-gray-200">
-            <div className="text-xs text-gray-500 uppercase font-medium">Avg. per Bill</div>
-            <div className="text-2xl font-bold text-gray-900">
-              {categorySales.length > 0
-                ? formatCurrency(
-                    categorySales.reduce((sum, c) => sum + c.totalSales, 0) /
-                      categorySales.reduce((sum, c) => sum + c.billCount, 0) || 0
-                  )
-                : formatCurrency(0)}
-            </div>
-          </div>
-        </div>
-
-        {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white p-4 rounded-xl border border-gray-200 h-[350px]">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-indigo-600" /> Daily Sales Trend
-            </h3>
-            <div className="h-[280px]">
-              {analyticsLoading ? (
-                <div className="flex h-full items-center justify-center text-gray-500 text-sm">
-                  Loading analytics...
-                </div>
-              ) : dailySales.length === 0 ? (
-                <div className="flex h-full items-center justify-center text-gray-500 text-sm">
-                  No sales data available
-                </div>
-              ) : (
-                <LineChart
-                  data={dailySales.map((d) => ({ date: d._id, sales: d.totalSales }))}
-                  options={{
-                    responsive: true,
-                    plugins: { legend: { display: false }, title: { display: false } },
-                    scales: {
-                      y: { beginAtZero: true, ticks: { callback: (v) => "₹" + v } },
-                    },
-                  }}
-                />
-              )}
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-gray-200 h-[350px]">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <PieChart className="w-4 h-4 text-indigo-600" /> Category-wise Sales
-            </h3>
-            <div className="h-[280px] flex items-center justify-center">
-              {analyticsLoading ? (
-                <div className="text-gray-500 text-sm">Loading analytics...</div>
-              ) : categorySales.length === 0 ? (
-                <div className="text-gray-500 text-sm">No sales data available</div>
-              ) : (
-                <DoughnutChart
-                  data={{
-                    labels: categorySales.map((c) => c.categoryName || "Uncategorized"),
-                    datasets: [
-                      {
-                        data: categorySales.map((c) => c.totalSales),
-                        backgroundColor: [
-                          "#4f46e5", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6",
-                          "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1",
-                        ],
-                        borderWidth: 0,
-                        hoverOffset: 4,
-                      },
-                    ],
-                  }}
-                  options={{
-                    responsive: true,
-                    plugins: {
-                      legend: { position: "right", labels: { font: { size: 12 } } },
-                      title: { display: false },
-                    },
-                  }}
-                />
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-8">
