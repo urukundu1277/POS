@@ -4,20 +4,40 @@ import toast from "react-hot-toast";
 import {
   Building,
   AlertCircle,
-  PieChart,
+  PieChart as PieIcon,
   Activity,
 } from "lucide-react";
-import {
-  Doughnut as DoughnutChart,
-  Line as LineChart,
-} from "react-chartjs-2";
-import { Chart, registerables } from "chart.js";
-try {
-  Chart.register(...registerables);
-} catch (e) {
-  // Chart.js registration fallback
-}
 import { formatCurrency } from "../utils/format";
+
+let Chart = null;
+let DoughnutChart = null;
+let LineChart = null;
+
+try {
+  const chartJs = require("chart.js");
+  Chart = chartJs.Chart || chartJs.default;
+  if (chartJs.registerables) {
+    Chart.register(...chartJs.registerables);
+  }
+} catch (e) {
+  // Chart.js not available - charts will be skipped
+}
+
+try {
+  const reactChartJs = require("react-chartjs-2");
+  DoughnutChart = reactChartJs.Doughnut;
+  LineChart = reactChartJs.Line;
+} catch (e) {
+  // react-chartjs-2 not available - charts will be skipped
+}
+
+const SafeChart = ({ children, fallback }) => {
+  try {
+    return children;
+  } catch (e) {
+    return fallback || <div className="text-gray-500 text-sm">Chart unavailable</div>;
+  }
+};
 
 export default function BusinessProfile() {
   const [business, setBusiness] = useState(null);
@@ -35,11 +55,16 @@ export default function BusinessProfile() {
   const [categorySales, setCategorySales] = useState([]);
   const [dailySales, setDailySales] = useState([]);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [chartsReady, setChartsReady] = useState(false);
 
   useEffect(() => {
     loadBusiness();
     loadAnalytics();
-  }, []);
+
+    if (Chart && !chartsReady) {
+      setChartsReady(true);
+    }
+  }, [chartsReady]);
 
   const loadBusiness = async () => {
     try {
@@ -68,10 +93,11 @@ export default function BusinessProfile() {
         api.get("/bills/analytics/category-sales"),
         api.get("/bills/analytics/daily-sales"),
       ]);
-      setCategorySales(catRes.data.categorySales || []);
-      setDailySales(dailyRes.data.dailySales || []);
+      setCategorySales(Array.isArray(catRes.data.categorySales) ? catRes.data.categorySales : []);
+      setDailySales(Array.isArray(dailyRes.data.dailySales) ? dailyRes.data.dailySales : []);
     } catch (err) {
-      // Analytics may fail if no bills yet - that's ok
+      setCategorySales([]);
+      setDailySales([]);
     } finally {
       setAnalyticsLoading(false);
     }
@@ -117,15 +143,22 @@ export default function BusinessProfile() {
     }
   };
 
-  if (loading) return <div className="flex h-full items-center justify-center">Loading...</div>;
-
-  const totalBills = categorySales.reduce((sum, c) => sum + c.billCount, 0);
-  const totalItems = categorySales.reduce((sum, c) => sum + c.totalQuantity, 0);
-  const grandTotal = categorySales.reduce((sum, c) => sum + c.totalSales, 0);
+  const totalBills = categorySales.reduce((sum, c) => sum + (c.billCount || 0), 0);
+  const totalItems = categorySales.reduce((sum, c) => sum + (c.totalQuantity || 0), 0);
+  const grandTotal = categorySales.reduce((sum, c) => sum + (c.totalSales || 0), 0);
   const avgPerBill = totalBills > 0 ? grandTotal / totalBills : 0;
 
+  if (loading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <span className="ml-2 text-sm text-gray-600">Loading profile...</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-screen">
       <div className="flex items-center gap-4">
         <Building className="w-6 h-6 text-indigo-600" />
         <h1 className="text-xl font-bold text-gray-900">Business Profile</h1>
@@ -237,7 +270,7 @@ export default function BusinessProfile() {
       <div className="card p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <PieChart className="w-5 h-5 text-indigo-600" /> Business Analysis
+            <PieIcon className="w-5 h-5 text-indigo-600" /> Business Analysis
           </h2>
           {!analyticsLoading && categorySales.length > 0 && (
             <span className="text-xs text-gray-500">Based on generated bills</span>
@@ -284,22 +317,30 @@ export default function BusinessProfile() {
                   No sales data available
                 </div>
               ) : (
-                <LineChart
-                  data={dailySales.map((d) => ({ date: d._id, sales: d.totalSales }))}
-                  options={{
-                    responsive: true,
-                    plugins: { legend: { display: false }, title: { display: false } },
-                    scales: {
-                      y: { beginAtZero: true, ticks: { callback: (v) => "₹" + v } },
-                    },
-                  }}
-                />
+                <div>
+                  {LineChart ? (
+                    <LineChart
+                      data={dailySales.map((d) => ({ date: d._id, sales: d.totalSales }))}
+                      options={{
+                        responsive: true,
+                        plugins: { legend: { display: false }, title: { display: false } },
+                        scales: {
+                          y: { beginAtZero: true, ticks: { callback: (v) => "₹" + v } },
+                        },
+                      }}
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-gray-500 text-sm">
+                      Chart library not available
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>
           <div className="bg-white p-4 rounded-xl border border-gray-200 h-[350px]">
             <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <PieChart className="w-4 h-4 text-indigo-600" /> Category-wise Sales
+              <PieIcon className="w-4 h-4 text-indigo-600" /> Category-wise Sales
             </h3>
             <div className="h-[280px] flex items-center justify-center">
               {analyticsLoading ? (
@@ -307,29 +348,35 @@ export default function BusinessProfile() {
               ) : categorySales.length === 0 ? (
                 <div className="text-gray-500 text-sm">No sales data available</div>
               ) : (
-                <DoughnutChart
-                  data={{
-                    labels: categorySales.map((c) => c.categoryName || "Uncategorized"),
-                    datasets: [
-                      {
-                        data: categorySales.map((c) => c.totalSales),
-                        backgroundColor: [
-                          "#4f46e5", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6",
-                          "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1",
+                <div>
+                  {DoughnutChart ? (
+                    <DoughnutChart
+                      data={{
+                        labels: categorySales.map((c) => c.categoryName || "Uncategorized"),
+                        datasets: [
+                          {
+                            data: categorySales.map((c) => c.totalSales || 0),
+                            backgroundColor: [
+                              "#4f46e5", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6",
+                              "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1",
+                            ],
+                            borderWidth: 0,
+                            hoverOffset: 4,
+                          },
                         ],
-                        borderWidth: 0,
-                        hoverOffset: 4,
-                      },
-                    ],
-                  }}
-                  options={{
-                    responsive: true,
-                    plugins: {
-                      legend: { position: "right", labels: { font: { size: 12 } } },
-                      title: { display: false },
-                    },
-                  }}
-                />
+                      }}
+                      options={{
+                        responsive: true,
+                        plugins: {
+                          legend: { position: "right", labels: { font: { size: 12 } } },
+                          title: { display: false },
+                        },
+                      }}
+                    />
+                  ) : (
+                    <div className="text-gray-500 text-sm">Chart library not available</div>
+                  )}
+                </div>
               )}
             </div>
           </div>
