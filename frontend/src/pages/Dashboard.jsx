@@ -25,7 +25,6 @@ export default function Dashboard() {
   const [printing, setPrinting] = useState(false);
   const [billPreview, setBillPreview] = useState(null);
   const [portionSelection, setPortionSelection] = useState({});
-  const [portionPrice, setPortionPrice] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -225,13 +224,14 @@ export default function Dashboard() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border border-gray-200 rounded-xl bg-white">
                     <thead>
-                      <tr className="bg-gray-50 border-b border-gray-200">
-                        <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Name</th>
-                        <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Price (₹)</th>
-                        <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase text-center">Unit</th>
-                        <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase text-right">Price</th>
-                        <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase text-center">Add</th>
-                      </tr>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Name</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase text-center">Single</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase text-center">Full</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase text-center">Portion</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase text-right">Price</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase text-center">Add</th>
+              </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                       {filteredItems.map((item) => {
@@ -239,7 +239,6 @@ export default function Dashboard() {
                         const singlePrice = Number(item.price);
                         const fullPrice = Number(item.fullPrice) || singlePrice;
                         const portionPrice = selectedPortion === "full" && item.fullPrice ? fullPrice : singlePrice;
-                        const unit = item.portionUnit || "piece";
                         return (
                           <tr key={item._id} className="hover:bg-indigo-50 transition-colors">
                             <td className="px-4 py-3">
@@ -277,24 +276,13 @@ export default function Dashboard() {
                                   </label>
                                 )}
                               </div>
-                              <div className="mt-2">
-                                <select
-                                  value={unit}
-                                  onChange={(e) => setPortionSelection({ ...portionSelection, [item._id]: e.target.value })}
-                                  className="select w-20 text-xs"
-                                >
-                                  {["piece", "kg", "liter", "gram", "ml", "dozen"].map((u) => (
-                                    <option key={u} value={u}>{u.charAt(0).toUpperCase() + u.slice(1)}</option>
-                                  ))}
-                                </select>
-                              </div>
                             </td>
                             <td className="px-4 py-3 text-right font-medium text-gray-900">
                               {formatCurrency(portionPrice)}
                             </td>
                             <td className="px-4 py-3 text-center">
                               <button
-                                onClick={() => addToCart(item, selectedPortion, portionPrice, unit)}
+                                onClick={() => addToCart(item, selectedPortion, portionPrice, item.portionUnit || "piece")}
                                 className="w-full py-1.5 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 active:scale-95 transition-all duration-200"
                               >
                                 Add
