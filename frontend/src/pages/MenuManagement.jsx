@@ -17,7 +17,7 @@ export default function MenuManagement() {
   const [menuItems, setMenuItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ itemName: "", categoryId: "", description: "", price: "", fullPrice: "", status: "active", image: "" });
+  const [form, setForm] = useState({ itemName: "", categoryId: "", description: "", price: "", fullPrice: "", portionUnit: "", status: "active", image: "" });
   const [editing, setEditing] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -59,7 +59,7 @@ export default function MenuManagement() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ itemName: "", categoryId: "", description: "", price: "", fullPrice: "", status: "active", image: "" });
+    setForm({ itemName: "", categoryId: "", description: "", price: "", fullPrice: "", portionUnit: "", status: "active", image: "" });
     setImagePreview("");
     setModalOpen(true);
   };
@@ -72,6 +72,7 @@ export default function MenuManagement() {
       description: item.description,
       price: item.price,
       fullPrice: item.fullPrice,
+      portionUnit: item.portionUnit || "",
       status: item.status,
       image: item.image,
     });
@@ -89,6 +90,7 @@ export default function MenuManagement() {
       formData.append("description", form.description);
       formData.append("price", form.price);
       formData.append("fullPrice", form.fullPrice);
+      formData.append("portionUnit", form.portionUnit);
       formData.append("status", form.status);
       if (imagePreview && imagePreview.startsWith("data:")) {
         const blob = await (await fetch(imagePreview)).blob();
@@ -210,6 +212,7 @@ export default function MenuManagement() {
                 <th className="px-4 py-3">Category</th>
                 <th className="px-4 py-3">Single Price</th>
                 <th className="px-4 py-3">Full Price</th>
+                <th className="px-4 py-3">Portion Unit</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
@@ -238,6 +241,7 @@ export default function MenuManagement() {
                     <td className="px-4 py-3 text-sm text-gray-600">{categoryMap[item.categoryId] || "—"}</td>
                     <td className="px-4 py-3">{formatCurrency(item.price)}</td>
                     <td className="px-4 py-3">{item.fullPrice ? formatCurrency(item.fullPrice) : "—"}</td>
+                    <td className="px-4 py-3 text-gray-600">{item.portionUnit || "—"}</td>
                     <td className="px-4 py-3">
                       <span className={`badge ${item.status === "active" ? "badge-active" : "badge-inactive"}`}>
                         {item.status}
@@ -343,6 +347,17 @@ export default function MenuManagement() {
                 onChange={handleChange}
               />
               <p className="text-xs text-gray-500">Optional full portion price</p>
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Portion Unit</label>
+              <input
+                name="portionUnit"
+                className="input"
+                placeholder="e.g. kg, liters, pieces"
+                value={form.portionUnit}
+                onChange={handleChange}
+              />
+              <p className="text-xs text-gray-500">Unit of measurement (optional)</p>
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Item Image (optional)</label>

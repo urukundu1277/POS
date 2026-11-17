@@ -10,6 +10,7 @@ const menuItemSchema = new mongoose.Schema(
     fullPrice: { type: Number, min: 0, default: 0 },
     image: { type: String, default: "" },
     status: { type: String, enum: ["active", "inactive"], default: "active" },
+    portionUnit: { type: String, default: "" },
   },
   { timestamps: true }
 );

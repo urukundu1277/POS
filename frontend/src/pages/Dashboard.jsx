@@ -79,6 +79,7 @@ export default function Dashboard() {
         quantity: 1,
         portionType,
         portionPrice,
+        portionUnit: item.portionUnit || "",
       }];
     });
     toast.success(`${item.itemName} (${portionType}) added to cart`);
@@ -318,7 +319,7 @@ export default function Dashboard() {
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-baseline">
                         <span className="text-sm font-medium text-gray-900">{item.itemName}</span>
-                        <span className="text-xs text-gray-500">{item.portionType === "full" ? "Full" : "Single"} ×{item.quantity}</span>
+                        <span className="text-xs text-gray-500">{item.portionType === "full" ? "Full" : "Single"}{item.portionUnit ? ` (${item.portionUnit})` : ""} ×{item.quantity}</span>
                       </div>
                       <span className="text-xs text-gray-500">{formatCurrency(item.price)} each</span>
                     </div>

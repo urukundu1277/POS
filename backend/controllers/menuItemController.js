@@ -3,7 +3,7 @@ const Category = require("../models/Category");
 
 exports.createMenuItem = async (req, res) => {
   try {
-    const { itemName, categoryId, description, price, fullPrice, status } = req.body;
+    const { itemName, categoryId, description, price, fullPrice, status, portionUnit } = req.body;
 
     if (!itemName || !categoryId || price === undefined || price === null) {
       return res.status(400).json({ message: "Item name, category, and price are required." });
@@ -31,6 +31,7 @@ exports.createMenuItem = async (req, res) => {
       fullPrice: Number(fullPrice) || 0,
       image,
       status: status || "active",
+      portionUnit: portionUnit || "",
     });
 
     res.status(201).json({ message: "Menu item created successfully.", menuItem });
@@ -74,7 +75,7 @@ exports.getMenuItem = async (req, res) => {
 
 exports.updateMenuItem = async (req, res) => {
   try {
-    const { itemName, categoryId, description, price, fullPrice, status } = req.body;
+    const { itemName, categoryId, description, price, fullPrice, status, portionUnit } = req.body;
 
     const menuItem = await MenuItem.findOne({
       _id: req.params.id,
@@ -100,6 +101,7 @@ exports.updateMenuItem = async (req, res) => {
     if (price !== undefined && price !== null) menuItem.price = Number(price);
     if (fullPrice !== undefined && fullPrice !== null) menuItem.fullPrice = Number(fullPrice);
     if (status) menuItem.status = status;
+    if (portionUnit !== undefined) menuItem.portionUnit = portionUnit;
 
     if (req.file) {
       menuItem.image = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;

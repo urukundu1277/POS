@@ -44,6 +44,7 @@ exports.createBill = async (req, res) => {
         itemName: item.itemName,
         categoryId,
         categoryName,
+        portionUnit: item.portionUnit || "",
         price,
         quantity,
         total: itemTotal,

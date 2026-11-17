@@ -5,6 +5,7 @@ const billItemSchema = new mongoose.Schema(
     itemName: { type: String, required: true },
     categoryId: { type: mongoose.Schema.Types.ObjectId, ref: "Category" },
     categoryName: { type: String, default: "" },
+    portionUnit: { type: String, default: "" },
     price: { type: Number, required: true },
     quantity: { type: Number, required: true, min: 1 },
     total: { type: Number, required: true },
