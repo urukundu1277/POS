@@ -11,7 +11,6 @@ import {
   Printer,
   Download,
   AlertCircle,
-  CheckCircle,
 } from "lucide-react";
 import { formatCurrency } from "../utils/format";
 
@@ -394,9 +393,19 @@ export default function Dashboard() {
       {billPreview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setBillPreview(null)}>
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-green-500" /> Bill Ready
-            </h3>
+            <div className="text-center mb-4">
+              {business?.logo ? (
+                <img src={business.logo} alt="Logo" className="w-12 h-12 mx-auto mb-1 rounded object-cover border-2 border-indigo-100" />
+              ) : (
+                <div className="w-12 h-12 mx-auto mb-1 border-2 border-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600">
+                  LOGO
+                </div>
+              )}
+              <h3 className="text-lg font-bold text-gray-900">{business?.businessName || "Business"}</h3>
+              <p className="text-xs text-gray-600">{business?.address || ""}</p>
+              <p className="text-xs text-gray-600">Mobile: {business?.mobile || ""}</p>
+            </div>
+            <hr className="border-black mb-4" />
             <p className="text-sm text-gray-600 mb-4">Bill #{billPreview.billNumber} - {formatCurrency(billPreview.grandTotal)}</p>
 
             <div className="overflow-x-auto mb-4">

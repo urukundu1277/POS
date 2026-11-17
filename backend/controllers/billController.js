@@ -1,5 +1,6 @@
 const Bill = require("../models/Bill");
 const MenuItem = require("../models/MenuItem");
+const Business = require("../models/Business");
 
 exports.createBill = async (req, res) => {
   try {
@@ -8,6 +9,16 @@ exports.createBill = async (req, res) => {
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: "Cart is empty. Add items before generating a bill." });
     }
+
+    const business = await Business.findById(req.user.businessId);
+    if (!business) {
+      return res.status(404).json({ message: "Business not found." });
+    }
+
+    const businessName = business.businessName || "";
+    const businessAddress = business.address || "";
+    const businessMobile = business.mobile || "";
+    const businessLogo = business.logo || "";
 
     const processedItems = [];
     let grandTotal = 0;
@@ -50,6 +61,10 @@ exports.createBill = async (req, res) => {
       items: processedItems,
       totalItems,
       grandTotal,
+      businessName: businessName,
+      businessAddress: businessAddress,
+      businessMobile: businessMobile,
+      businessLogo: businessLogo,
     });
 
     res.status(201).json({

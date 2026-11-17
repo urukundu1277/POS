@@ -16,6 +16,10 @@ const billSchema = new mongoose.Schema(
   {
     businessId: { type: mongoose.Schema.Types.ObjectId, ref: "Business", required: true, index: true },
     billNumber: { type: String, required: true },
+    businessName: { type: String, default: "" },
+    businessAddress: { type: String, default: "" },
+    businessMobile: { type: String, default: "" },
+    businessLogo: { type: String, default: "" },
     items: [billItemSchema],
     totalItems: { type: Number, required: true },
     grandTotal: { type: Number, required: true },
