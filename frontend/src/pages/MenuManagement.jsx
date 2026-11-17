@@ -14,6 +14,7 @@ import {
 import { formatCurrency } from "../utils/format";
 
 export default function MenuManagement() {
+  const [menuItems, setMenuItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ itemName: "", categoryId: "", description: "", price: "", fullPrice: "", status: "active", image: "" });

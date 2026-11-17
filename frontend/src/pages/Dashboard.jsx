@@ -49,13 +49,14 @@ export default function Dashboard() {
   };
 
   const getCategoryId = (item) => {
-    if (!item.categoryId) return null;
+    if (!item || !item.categoryId) return null;
     if (typeof item.categoryId === "object") return item.categoryId._id;
     return item.categoryId;
   };
 
-  const filteredItems = menuItems.filter(
+  const filteredItems = (menuItems || []).filter(
     (item) =>
+      item && item.itemName &&
       (selectedCategory === "all" || getCategoryId(item) === selectedCategory) &&
       item.itemName.toLowerCase().includes(search.toLowerCase())
   );
