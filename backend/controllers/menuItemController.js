@@ -3,7 +3,7 @@ const Category = require("../models/Category");
 
 exports.createMenuItem = async (req, res) => {
   try {
-    const { itemName, categoryId, description, price, fullPrice, status, portionUnit } = req.body;
+    const { itemName, categoryId, description, price, status, portionUnit } = req.body;
 
     if (!itemName || !categoryId || price === undefined || price === null) {
       return res.status(400).json({ message: "Item name, category, and price are required." });
@@ -28,10 +28,9 @@ exports.createMenuItem = async (req, res) => {
       itemName,
       description: description || "",
       price: Number(price),
-      fullPrice: Number(fullPrice) || 0,
       image,
       status: status || "active",
-      portionUnit: portionUnit || "",
+      portionUnit: portionUnit || "piece",
     });
 
     res.status(201).json({ message: "Menu item created successfully.", menuItem });
@@ -75,7 +74,7 @@ exports.getMenuItem = async (req, res) => {
 
 exports.updateMenuItem = async (req, res) => {
   try {
-    const { itemName, categoryId, description, price, fullPrice, status, portionUnit } = req.body;
+    const { itemName, categoryId, description, price, status, portionUnit } = req.body;
 
     const menuItem = await MenuItem.findOne({
       _id: req.params.id,
@@ -99,7 +98,6 @@ exports.updateMenuItem = async (req, res) => {
     if (itemName) menuItem.itemName = itemName;
     if (description !== undefined) menuItem.description = description;
     if (price !== undefined && price !== null) menuItem.price = Number(price);
-    if (fullPrice !== undefined && fullPrice !== null) menuItem.fullPrice = Number(fullPrice);
     if (status) menuItem.status = status;
     if (portionUnit !== undefined) menuItem.portionUnit = portionUnit;
 

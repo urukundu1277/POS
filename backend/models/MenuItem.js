@@ -7,10 +7,9 @@ const menuItemSchema = new mongoose.Schema(
     itemName: { type: String, required: true, trim: true },
     description: { type: String, default: "", trim: true },
     price: { type: Number, required: true, min: 0 },
-    fullPrice: { type: Number, min: 0, default: 0 },
     image: { type: String, default: "" },
     status: { type: String, enum: ["active", "inactive"], default: "active" },
-    portionUnit: { type: String, default: "" },
+    portionUnit: { type: String, enum: ["piece", "kg", "liter", "gram", "ml", "dozen"], default: "piece" },
   },
   { timestamps: true }
 );

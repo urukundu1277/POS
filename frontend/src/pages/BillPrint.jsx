@@ -98,6 +98,7 @@ export default function BillPrint() {
             <tr className="border-b border-black">
               <th className="text-left pb-1">Item</th>
               <th className="text-center pb-1">Qty</th>
+              <th className="text-center pb-1">Unit</th>
               <th className="text-right pb-1">Price</th>
               <th className="text-right pb-1">Total</th>
             </tr>
@@ -107,6 +108,7 @@ export default function BillPrint() {
               <tr key={it.itemName + it.quantity} className="border-b border-b-gray-200">
                 <td className="pb-1 text-left">{it.itemName}</td>
                 <td className="pb-1 text-center">{it.quantity}</td>
+                <td className="pb-1 text-center">{it.unit || it.portionUnit || "piece"}</td>
                 <td className="pb-1 text-right">₹{it.price.toFixed(2)}</td>
                 <td className="pb-1 text-right">₹{it.total.toFixed(2)}</td>
               </tr>
