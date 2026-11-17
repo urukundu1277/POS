@@ -398,6 +398,34 @@ export default function Dashboard() {
               <CheckCircle className="w-5 h-5 text-green-500" /> Bill Ready
             </h3>
             <p className="text-sm text-gray-600 mb-4">Bill #{billPreview.billNumber} - {formatCurrency(billPreview.grandTotal)}</p>
+
+            <div className="overflow-x-auto mb-4">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Item</th>
+                    <th className="px-2 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Qty</th>
+                    <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Price</th>
+                    <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Total</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {billPreview.items.map((item) => (
+                    <tr key={item.itemName + item.quantity} className="text-sm">
+                      <td className="px-2 py-2 text-gray-900">{item.itemName}</td>
+                      <td className="px-2 py-2 text-center text-gray-600">{item.quantity}</td>
+                      <td className="px-2 py-2 text-right text-gray-600">₹{Number(item.price).toFixed(2)}</td>
+                      <td className="px-2 py-2 text-right text-gray-900">₹{Number(item.total).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex justify-between text-sm font-bold pt-2 border-t border-gray-200 mb-4">
+              <span>Grand Total</span>
+              <span>₹{Number(billPreview.grandTotal).toFixed(2)}</span>
+            </div>
             <div className="flex gap-3">
               <button onClick={() => { setPrinting(true); setTimeout(() => { window.print(); setPrinting(false); }, 100); }} className="btn-primary flex-1">
                 <Printer className="w-4 h-4 mr-2" /> Print Bill

@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Bill = require("../models/Bill");
 const MenuItem = require("../models/MenuItem");
 
@@ -93,7 +94,7 @@ exports.getBill = async (req, res) => {
 exports.getCategorySales = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-    const match = { businessId: req.user.businessId };
+    const match = { businessId: new mongoose.Types.ObjectId(req.user.businessId) };
     if (startDate && endDate) {
       match.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
@@ -103,8 +104,12 @@ exports.getCategorySales = async (req, res) => {
       { $unwind: "$items" },
       {
         $group: {
-          _id: "$items.categoryId",
-          categoryName: { $first: "$items.categoryName" },
+          _id: { $ifNull: ["$items.categoryId", "uncategorized"] },
+          categoryName: {
+            $first: {
+              $ifNull: ["$items.categoryName", "Uncategorized"],
+            },
+          },
           totalQuantity: { $sum: "$items.quantity" },
           totalSales: { $sum: "$items.total" },
           billCount: { $sum: 1 },
@@ -122,7 +127,7 @@ exports.getCategorySales = async (req, res) => {
 exports.getDailySales = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-    const match = { businessId: req.user.businessId };
+    const match = { businessId: new mongoose.Types.ObjectId(req.user.businessId) };
     if (startDate && endDate) {
       match.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
