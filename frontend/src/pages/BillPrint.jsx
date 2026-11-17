@@ -84,16 +84,8 @@ export default function BillPrint() {
         printType === "58mm" ? "w-[220px]" : printType === "a4" ? "w-[210mm]" : "w-[320px]"
       }`}>
         <div className="text-center border-b-2 border-black pb-2 mb-4">
-          {business?.logo ? (
-            <img src={business.logo} alt="Logo" className="w-16 h-16 mx-auto mb-1 rounded object-cover" />
-          ) : (
-            <div className="w-16 h-16 mx-auto mb-1 border border-black flex items-center justify-center text-sm font-bold">
-              LOGO
-            </div>
-          )}
-          <div className="text-lg font-bold">{business?.businessName || bill.businessName}</div>
+          <h2 className="text-lg font-bold">{business?.businessName || bill.businessName}</h2>
           <div className="text-sm">{business?.address || bill.businessAddress}</div>
-          <div className="text-sm">Mobile: {business?.mobile || bill.businessMobile}</div>
         </div>
 
         <div className="flex justify-between text-sm mb-2">
