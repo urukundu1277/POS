@@ -1,4 +1,3 @@
-const mongoose = require("mongoose");
 const Bill = require("../models/Bill");
 const MenuItem = require("../models/MenuItem");
 
@@ -86,65 +85,6 @@ exports.getBill = async (req, res) => {
       return res.status(404).json({ message: "Bill not found." });
     }
     res.json({ bill });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-exports.getCategorySales = async (req, res) => {
-  try {
-    const { startDate, endDate } = req.query;
-    const match = { businessId: new mongoose.Types.ObjectId(req.user.businessId) };
-    if (startDate && endDate) {
-      match.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
-    }
-
-    const categorySales = await Bill.aggregate([
-      { $match: match },
-      { $unwind: "$items" },
-      {
-        $group: {
-          _id: { $ifNull: ["$items.categoryId", "uncategorized"] },
-          categoryName: {
-            $first: {
-              $ifNull: ["$items.categoryName", "Uncategorized"],
-            },
-          },
-          totalQuantity: { $sum: "$items.quantity" },
-          totalSales: { $sum: "$items.total" },
-          billCount: { $sum: 1 },
-        },
-      },
-      { $sort: { totalSales: -1 } },
-    ]);
-
-    res.json({ categorySales });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-exports.getDailySales = async (req, res) => {
-  try {
-    const { startDate, endDate } = req.query;
-    const match = { businessId: new mongoose.Types.ObjectId(req.user.businessId) };
-    if (startDate && endDate) {
-      match.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
-    }
-
-    const dailySales = await Bill.aggregate([
-      { $match: match },
-      {
-        $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-          totalSales: { $sum: "$grandTotal" },
-          billCount: { $sum: 1 },
-        },
-      },
-      { $sort: { _id: 1 } },
-    ]);
-
-    res.json({ dailySales });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -3,41 +3,8 @@ import api from "../services/api";
 import toast from "react-hot-toast";
 import {
   Building,
-  AlertCircle,
-  PieChart as PieIcon,
-  Activity,
 } from "lucide-react";
 import { formatCurrency } from "../utils/format";
-
-let Chart = null;
-let DoughnutChart = null;
-let LineChart = null;
-
-try {
-  const chartJs = require("chart.js");
-  Chart = chartJs.Chart || chartJs.default;
-  if (chartJs.registerables) {
-    Chart.register(...chartJs.registerables);
-  }
-} catch (e) {
-  // Chart.js not available - charts will be skipped
-}
-
-try {
-  const reactChartJs = require("react-chartjs-2");
-  DoughnutChart = reactChartJs.Doughnut;
-  LineChart = reactChartJs.Line;
-} catch (e) {
-  // react-chartjs-2 not available - charts will be skipped
-}
-
-const SafeChart = ({ children, fallback }) => {
-  try {
-    return children;
-  } catch (e) {
-    return fallback || <div className="text-gray-500 text-sm">Chart unavailable</div>;
-  }
-};
 
 export default function BusinessProfile() {
   const [business, setBusiness] = useState(null);
@@ -52,19 +19,10 @@ export default function BusinessProfile() {
   const [logo, setLogo] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [categorySales, setCategorySales] = useState([]);
-  const [dailySales, setDailySales] = useState([]);
-  const [analyticsLoading, setAnalyticsLoading] = useState(false);
-  const [chartsReady, setChartsReady] = useState(false);
 
   useEffect(() => {
     loadBusiness();
-    loadAnalytics();
-
-    if (Chart && !chartsReady) {
-      setChartsReady(true);
-    }
-  }, [chartsReady]);
+  }, []);
 
   const loadBusiness = async () => {
     try {
@@ -83,23 +41,6 @@ export default function BusinessProfile() {
       toast.error("Failed to load profile");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadAnalytics = async () => {
-    try {
-      setAnalyticsLoading(true);
-      const [catRes, dailyRes] = await Promise.all([
-        api.get("/bills/analytics/category-sales"),
-        api.get("/bills/analytics/daily-sales"),
-      ]);
-      setCategorySales(Array.isArray(catRes.data.categorySales) ? catRes.data.categorySales : []);
-      setDailySales(Array.isArray(dailyRes.data.dailySales) ? dailyRes.data.dailySales : []);
-    } catch (err) {
-      setCategorySales([]);
-      setDailySales([]);
-    } finally {
-      setAnalyticsLoading(false);
     }
   };
 
@@ -142,11 +83,6 @@ export default function BusinessProfile() {
       setSaving(false);
     }
   };
-
-  const totalBills = categorySales.reduce((sum, c) => sum + (c.billCount || 0), 0);
-  const totalItems = categorySales.reduce((sum, c) => sum + (c.totalQuantity || 0), 0);
-  const grandTotal = categorySales.reduce((sum, c) => sum + (c.totalSales || 0), 0);
-  const avgPerBill = totalBills > 0 ? grandTotal / totalBills : 0;
 
   if (loading) {
     return (
@@ -264,123 +200,6 @@ export default function BusinessProfile() {
             </button>
           </div>
         </form>
-      </div>
-
-      {/* Business Analysis Section */}
-      <div className="card p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <PieIcon className="w-5 h-5 text-indigo-600" /> Business Analysis
-          </h2>
-          {!analyticsLoading && categorySales.length > 0 && (
-            <span className="text-xs text-gray-500">Based on generated bills</span>
-          )}
-        </div>
-
-        {/* Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white p-4 rounded-xl border border-gray-200">
-            <div className="text-xs text-gray-500 uppercase font-medium">Total Bills</div>
-            <div className="text-2xl font-bold text-gray-900">{totalBills}</div>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-gray-200">
-            <div className="text-xs text-gray-500 uppercase font-medium">Total Items Sold</div>
-            <div className="text-2xl font-bold text-gray-900">{totalItems}</div>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-gray-200">
-            <div className="text-xs text-gray-500 uppercase font-medium">Grand Total Sales</div>
-            <div className="text-2xl font-bold text-gray-900">
-              {formatCurrency(grandTotal)}
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-gray-200">
-            <div className="text-xs text-gray-500 uppercase font-medium">Avg. per Bill</div>
-            <div className="text-2xl font-bold text-gray-900">
-              {formatCurrency(avgPerBill)}
-            </div>
-          </div>
-        </div>
-
-        {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white p-4 rounded-xl border border-gray-200 h-[350px]">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-indigo-600" /> Daily Sales Trend
-            </h3>
-            <div className="h-[280px]">
-              {analyticsLoading ? (
-                <div className="flex h-full items-center justify-center text-gray-500 text-sm">
-                  Loading analytics...
-                </div>
-              ) : dailySales.length === 0 ? (
-                <div className="flex h-full items-center justify-center text-gray-500 text-sm">
-                  No sales data available
-                </div>
-              ) : (
-                <div>
-                  {LineChart ? (
-                    <LineChart
-                      data={dailySales.map((d) => ({ date: d._id, sales: d.totalSales }))}
-                      options={{
-                        responsive: true,
-                        plugins: { legend: { display: false }, title: { display: false } },
-                        scales: {
-                          y: { beginAtZero: true, ticks: { callback: (v) => "₹" + v } },
-                        },
-                      }}
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-gray-500 text-sm">
-                      Chart library not available
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-gray-200 h-[350px]">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <PieIcon className="w-4 h-4 text-indigo-600" /> Category-wise Sales
-            </h3>
-            <div className="h-[280px] flex items-center justify-center">
-              {analyticsLoading ? (
-                <div className="text-gray-500 text-sm">Loading analytics...</div>
-              ) : categorySales.length === 0 ? (
-                <div className="text-gray-500 text-sm">No sales data available</div>
-              ) : (
-                <div>
-                  {DoughnutChart ? (
-                    <DoughnutChart
-                      data={{
-                        labels: categorySales.map((c) => c.categoryName || "Uncategorized"),
-                        datasets: [
-                          {
-                            data: categorySales.map((c) => c.totalSales || 0),
-                            backgroundColor: [
-                              "#4f46e5", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6",
-                              "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1",
-                            ],
-                            borderWidth: 0,
-                            hoverOffset: 4,
-                          },
-                        ],
-                      }}
-                      options={{
-                        responsive: true,
-                        plugins: {
-                          legend: { position: "right", labels: { font: { size: 12 } } },
-                          title: { display: false },
-                        },
-                      }}
-                    />
-                  ) : (
-                    <div className="text-gray-500 text-sm">Chart library not available</div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
