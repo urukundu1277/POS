@@ -59,7 +59,6 @@ export default function SalesHistory() {
       setStartDate(start);
       setEndDate(end);
     }
-    setFilter("custom");
   };
 
   const filtered = bills.filter((b) =>
