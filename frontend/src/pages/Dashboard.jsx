@@ -60,12 +60,12 @@ export default function Dashboard() {
       item.itemName.toLowerCase().includes(search.toLowerCase())
   );
 
-  const addToCart = (item, portionType, price, unit) => {
+  const addToCart = (item, portionType, price) => {
     setCart((prev) => {
-      const existing = prev.find((c) => c.itemId === item._id && c.portionType === portionType && c.unit === unit);
+      const existing = prev.find((c) => c.itemId === item._id && c.portionType === portionType);
       if (existing) {
         return prev.map((c) =>
-          c.itemId === item._id && c.portionType === portionType && c.unit === unit
+          c.itemId === item._id && c.portionType === portionType
             ? { ...c, quantity: c.quantity + 1 }
             : c
         );
@@ -78,43 +78,42 @@ export default function Dashboard() {
         price: price,
         quantity: 1,
         portionType,
-        unit,
         unitPrice: price,
         portionUnit: item.portionUnit || "",
       }];
     });
-    toast.success(`${item.itemName} (${portionType}, ${unit}) added to cart`);
+    toast.success(`${item.itemName} (${portionType}) added to cart`);
   };
 
-  const increaseQty = (itemId, portionType, unit) => {
+  const increaseQty = (itemId, portionType) => {
     setCart((prev) => prev.map((c) =>
-      c.itemId === itemId && c.portionType === portionType && c.unit === unit
+      c.itemId === itemId && c.portionType === portionType
         ? { ...c, quantity: c.quantity + 1 } : c
     ));
   };
 
-  const decreaseQty = (itemId, portionType, unit) => {
+  const decreaseQty = (itemId, portionType) => {
     setCart((prev) => {
       const next = prev.map((c) =>
-        c.itemId === itemId && c.portionType === portionType && c.unit === unit
+        c.itemId === itemId && c.portionType === portionType
           ? { ...c, quantity: c.quantity - 1 } : c
       );
       return next.filter((c) => c.quantity > 0);
     });
   };
 
-  const removeItem = (itemId, portionType, unit) => {
-    setCart((prev) => prev.filter((c) => !(c.itemId === itemId && c.portionType === portionType && c.unit === unit)));
+  const removeItem = (itemId, portionType) => {
+    setCart((prev) => prev.filter((c) => !(c.itemId === itemId && c.portionType === portionType)));
   };
 
-  const setQuantity = (itemId, portionType, unit, value) => {
+  const setQuantity = (itemId, portionType, value) => {
     const qty = parseInt(value) || 0;
     if (qty <= 0) {
-      removeItem(itemId, portionType, unit);
+      removeItem(itemId, portionType);
       return;
     }
     setCart((prev) => prev.map((c) =>
-      c.itemId === itemId && c.portionType === portionType && c.unit === unit
+      c.itemId === itemId && c.portionType === portionType
         ? { ...c, quantity: qty } : c
     ));
   };
@@ -228,7 +227,6 @@ export default function Dashboard() {
                 <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Name</th>
                 <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase text-center">Single</th>
                 <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase text-center">Full</th>
-                <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase text-center">Unit</th>
                 <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase text-right">Price</th>
                 <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase text-center">Add</th>
               </tr>
@@ -239,7 +237,6 @@ export default function Dashboard() {
                         const singlePrice = Number(item.price);
                         const fullPrice = Number(item.fullPrice) || singlePrice;
                         const portionPrice = selectedPortion === "full" && item.fullPrice ? fullPrice : singlePrice;
-                        const unit = item.portionUnit || "piece";
                         return (
                           <tr key={item._id} className="hover:bg-indigo-50 transition-colors">
                             <td className="px-4 py-3">
@@ -250,9 +247,6 @@ export default function Dashboard() {
                             </td>
                             <td className="px-4 py-3 text-gray-600">{formatCurrency(singlePrice)}</td>
                             <td className="px-4 py-3 text-gray-600">{item.fullPrice ? formatCurrency(fullPrice) : "—"}</td>
-                            <td className="px-4 py-3">
-                              <span className="text-xs font-medium text-indigo-600 uppercase">{unit}</span>
-                            </td>
                             <td className="px-4 py-3">
                               <div className="flex gap-2">
                                 <label className="flex items-center gap-1 cursor-pointer text-sm">
@@ -286,7 +280,7 @@ export default function Dashboard() {
                             </td>
                             <td className="px-4 py-3 text-center">
                               <button
-                                onClick={() => addToCart(item, selectedPortion, portionPrice, unit)}
+                                onClick={() => addToCart(item, selectedPortion, portionPrice)}
                                 className="w-full py-1.5 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 active:scale-95 transition-all duration-200"
                               >
                                 Add
@@ -317,17 +311,17 @@ export default function Dashboard() {
                 </div>
               ) : (
                 cart.map((item) => (
-                  <div key={`${item.itemId}-${item.portionType}-${item.unit}`} className="flex items-center gap-3 bg-gray-50 rounded-lg p-2 border border-gray-200">
+                  <div key={`${item.itemId}-${item.portionType}`} className="flex items-center gap-3 bg-gray-50 rounded-lg p-2 border border-gray-200">
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-baseline">
                         <span className="text-sm font-medium text-gray-900">{item.itemName}</span>
-                        <span className="text-xs text-gray-500">{item.portionType === "full" ? "Full" : "Single"} ({item.unit}) ×{item.quantity}</span>
+                        <span className="text-xs text-gray-500">{item.portionType === "full" ? "Full" : "Single"} ×{item.quantity}</span>
                       </div>
                       <span className="text-xs text-gray-500">{formatCurrency(item.price)} each</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <button
-                        onClick={() => decreaseQty(item.itemId, item.portionType, item.unit)}
+                        onClick={() => decreaseQty(item.itemId, item.portionType)}
                         className="w-7 h-7 rounded bg-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-300"
                       >
                         <Minus className="w-3 h-3" />
@@ -336,17 +330,17 @@ export default function Dashboard() {
                         type="number"
                         min="1"
                         value={item.quantity}
-                        onChange={(e) => setQuantity(item.itemId, item.portionType, item.unit, e.target.value)}
+                        onChange={(e) => setQuantity(item.itemId, item.portionType, e.target.value)}
                         className="w-8 text-center text-sm border border-gray-300 rounded px-1"
                       />
                       <button
-                        onClick={() => increaseQty(item.itemId, item.portionType, item.unit)}
+                        onClick={() => increaseQty(item.itemId, item.portionType)}
                         className="w-7 h-7 rounded bg-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-300"
                       >
                         <Plus className="w-3 h-3" />
                       </button>
                       <button
-                        onClick={() => removeItem(item.itemId, item.portionType, item.unit)}
+                        onClick={() => removeItem(item.itemId, item.portionType)}
                         className="ml-2 text-gray-400 hover:text-red-600"
                       >
                         <Trash2 className="w-4 h-4" />

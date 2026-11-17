@@ -13,13 +13,10 @@ import {
 } from "lucide-react";
 import { formatCurrency } from "../utils/format";
 
-const PORTION_UNITS = ["piece", "kg", "liter", "gram", "ml", "dozen"];
-
 export default function MenuManagement() {
-  const [menuItems, setMenuItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ itemName: "", categoryId: "", description: "", price: "", fullPrice: "", portionUnit: "piece", status: "active", image: "" });
+  const [form, setForm] = useState({ itemName: "", categoryId: "", description: "", price: "", fullPrice: "", status: "active", image: "" });
   const [editing, setEditing] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -61,7 +58,7 @@ export default function MenuManagement() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ itemName: "", categoryId: "", description: "", price: "", fullPrice: "", portionUnit: "piece", status: "active", image: "" });
+    setForm({ itemName: "", categoryId: "", description: "", price: "", fullPrice: "", status: "active", image: "" });
     setImagePreview("");
     setModalOpen(true);
   };
@@ -74,7 +71,6 @@ export default function MenuManagement() {
       description: item.description,
       price: item.price,
       fullPrice: item.fullPrice,
-      portionUnit: item.portionUnit || "piece",
       status: item.status,
       image: item.image,
     });
@@ -92,7 +88,6 @@ export default function MenuManagement() {
       formData.append("description", form.description);
       formData.append("price", form.price);
       formData.append("fullPrice", form.fullPrice);
-      formData.append("portionUnit", form.portionUnit);
       formData.append("status", form.status);
       if (imagePreview && imagePreview.startsWith("data:")) {
         const blob = await (await fetch(imagePreview)).blob();
@@ -212,9 +207,8 @@ export default function MenuManagement() {
               <tr className="bg-gray-50 text-xs text-gray-600 uppercase border-b">
                 <th className="px-4 py-3">Item</th>
                 <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3">Price/Unit</th>
+                <th className="px-4 py-3">Single Price</th>
                 <th className="px-4 py-3">Full Price</th>
-                <th className="px-4 py-3">Unit</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
@@ -243,7 +237,6 @@ export default function MenuManagement() {
                     <td className="px-4 py-3 text-sm text-gray-600">{categoryMap[item.categoryId] || "—"}</td>
                     <td className="px-4 py-3">{formatCurrency(item.price)}</td>
                     <td className="px-4 py-3">{item.fullPrice ? formatCurrency(item.fullPrice) : "—"}</td>
-                    <td className="px-4 py-3 text-gray-600">{item.portionUnit || "piece"}</td>
                     <td className="px-4 py-3">
                       <span className={`badge ${item.status === "active" ? "badge-active" : "badge-inactive"}`}>
                         {item.status}
@@ -335,22 +328,21 @@ export default function MenuManagement() {
                 onChange={handleChange}
                 required
               />
-              <p className="text-xs text-gray-500">Price per {form.portionUnit}</p>
+              <p className="text-xs text-gray-500">Price per single portion</p>
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Unit</label>
-              <select
-                name="portionUnit"
-                className="select"
-                value={form.portionUnit}
+              <label className="block text-sm font-medium text-gray-700">Full Price (₹)</label>
+              <input
+                name="fullPrice"
+                type="number"
+                min="0"
+                step="0.01"
+                className="input"
+                placeholder="0.00"
+                value={form.fullPrice}
                 onChange={handleChange}
-                required
-              >
-                {PORTION_UNITS.map((unit) => (
-                  <option key={unit} value={unit}>{unit.charAt(0).toUpperCase() + unit.slice(1)}</option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500">Select unit of measurement</p>
+              />
+              <p className="text-xs text-gray-500">Optional full portion price</p>
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Full Price (₹)</label>
