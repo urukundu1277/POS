@@ -143,8 +143,9 @@ export default function MenuManagement() {
   const categoryMap = {};
   categories.forEach((c) => { categoryMap[c._id] = c.categoryName; });
 
-  const filtered = menuItems.filter(
+  const filtered = (menuItems || []).filter(
     (item) =>
+      item && item.itemName &&
       item.itemName.toLowerCase().includes(search.toLowerCase()) &&
       (!filterCategory || item.categoryId === filterCategory)
   );
@@ -181,8 +182,8 @@ export default function MenuManagement() {
             onChange={(e) => setFilterCategory(e.target.value)}
           >
             <option value="">All Categories</option>
-            {categories.map((c) => (
-              <option key={c._id} value={c._id}>{c.categoryName}</option>
+            {(categories || []).map((c) => (
+              <option key={c._id || c.id} value={c._id || c.id}>{c.categoryName || c.name || "Category"}</option>
             ))}
           </select>
           <select
