@@ -216,54 +216,60 @@ export default function MenuManagement() {
             <tbody className="divide-y">
               {loading ? (
                 <tr><td colSpan="5" className="p-4 text-center">Loading...</td></tr>
+              ) : (!categories || categories.length === 0) ? (
+                <tr><td colSpan="5" className="p-8 text-center text-gray-500">Loading categories...</td></tr>
               ) : filtered.length === 0 ? (
                 <tr><td colSpan="5" className="p-8 text-center text-gray-500">No items found.</td></tr>
               ) : (
-                filtered.map((item) => (
-                  <tr key={item._id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        {item.image ? (
-                          <img src={item.image} alt={item.itemName} className="w-8 h-8 rounded object-cover border border-gray-200" />
-                        ) : (
-                          <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-gray-400">
-                            <SlidersHorizontal className="w-4 h-4" />
-                          </div>
-                        )}
-                        <div className="font-medium text-gray-900">{item.itemName}</div>
-                      </div>
-                      <p className="text-xs text-gray-500">{item.description || ""}</p>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{categoryMap[item.categoryId] || "—"}</td>
-                    <td className="px-4 py-3">{formatCurrency(item.price)}</td>
-                    <td className="px-4 py-3">{item.fullPrice ? formatCurrency(item.fullPrice) : "—"}</td>
-                    <td className="px-4 py-3">
-                      <span className={`badge ${item.status === "active" ? "badge-active" : "badge-inactive"}`}>
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => toggleStatus(item)}
-                        className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      >
-                        {item.status === "active" ? "Disable" : "Enable"}
-                      </button>
-                      <button
-                        onClick={() => openEdit(item)}
-                        className="ml-2 text-xs px-2 py-1 rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
-                      >
-                        <Edit className="w-3 h-3 mr-1" /> Edit
-                      </button>
-                      <button
-                        onClick={() => deleteItem(item._id)}
-                        className="ml-2 text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100"
-                      >
-                        <Trash2 className="w-3 h-3 mr-1" /> Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                filtered.map((item) => {
+                  if (!item) return null;
+                  const catName = (item.categoryId && typeof item.categoryId === 'object' && item.categoryId.categoryName) || (categoryMap[item.categoryId]) || "—";
+                  return (
+                    <tr key={item._id || item.itemName} className="hover:bg-gray-50">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          {item.image ? (
+                            <img src={item.image} alt={item.itemName} className="w-8 h-8 rounded object-cover border border-gray-200" />
+                          ) : (
+                            <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-gray-400">
+                              <SlidersHorizontal className="w-4 h-4" />
+                            </div>
+                          )}
+                          <div className="font-medium text-gray-900">{item.itemName || "Item"}</div>
+                        </div>
+                        <p className="text-xs text-gray-500">{item.description || ""}</p>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{catName}</td>
+                      <td className="px-4 py-3">{item.price != null ? formatCurrency(item.price) : "—"}</td>
+                      <td className="px-4 py-3">{item.fullPrice != null ? formatCurrency(item.fullPrice) : "—"}</td>
+                      <td className="px-4 py-3">
+                        <span className={`badge ${item.status === "active" ? "badge-active" : "badge-inactive"}`}>
+                          {item.status || "active"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <button
+                          onClick={() => toggleStatus(item)}
+                          className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        >
+                          {item.status === "active" ? "Disable" : "Enable"}
+                        </button>
+                        <button
+                          onClick={() => openEdit(item)}
+                          className="ml-2 text-xs px-2 py-1 rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                        >
+                          <Edit className="w-3 h-3 mr-1" /> Edit
+                        </button>
+                        <button
+                          onClick={() => deleteItem(item._id)}
+                          className="ml-2 text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100"
+                        >
+                          <Trash2 className="w-3 h-3 mr-1" /> Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
