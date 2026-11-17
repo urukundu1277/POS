@@ -28,8 +28,23 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const login = (token, userData, businessData) => {
+    localStorage.setItem("token", token);
+    api.defaults.headers.common.Authorization = `Bearer ${token}`;
+    setUser(userData);
+    setBusiness(businessData);
+    setLoading(false);
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    delete api.defaults.headers.common.Authorization;
+    setUser(null);
+    setBusiness(null);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, business, setBusiness, loading }}>
+    <AuthContext.Provider value={{ user, business, setBusiness, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

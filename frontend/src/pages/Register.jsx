@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import toast from "react-hot-toast";
 import { Mail, Lock, User, Building, AlertCircle } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -17,6 +18,7 @@ export default function Register() {
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -27,8 +29,7 @@ export default function Register() {
     setLoading(true);
     try {
       const res = await api.post("/auth/register", form);
-      localStorage.setItem("token", res.data.token);
-      api.defaults.headers.common.Authorization = `Bearer ${res.data.token}`;
+      login(res.data.token, res.data.user, res.data.business);
       toast.success(res.data.message);
       navigate("/");
     } catch (err) {

@@ -3,19 +3,20 @@ import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import toast from "react-hot-toast";
 import { Mail, Lock, LockKeyhole, AlertCircle } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const res = await api.post("/auth/login", form);
-      localStorage.setItem("token", res.data.token);
-      api.defaults.headers.common.Authorization = `Bearer ${res.data.token}`;
+      login(res.data.token, res.data.user, res.data.business);
       toast.success(res.data.message);
       navigate("/");
     } catch (err) {
