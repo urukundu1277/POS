@@ -12,7 +12,11 @@ import {
   Line as LineChart,
 } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
-Chart.register(...registerables);
+try {
+  Chart.register(...registerables);
+} catch (e) {
+  // Chart.js registration fallback
+}
 import { formatCurrency } from "../utils/format";
 
 export default function BusinessProfile() {
