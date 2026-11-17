@@ -212,7 +212,7 @@ export default function MenuManagement() {
               <tr className="bg-gray-50 text-xs text-gray-600 uppercase border-b">
                 <th className="px-4 py-3">Item</th>
                 <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3">Single Price</th>
+                <th className="px-4 py-3">Price/Unit</th>
                 <th className="px-4 py-3">Full Price</th>
                 <th className="px-4 py-3">Unit</th>
                 <th className="px-4 py-3">Status</th>
@@ -335,6 +335,22 @@ export default function MenuManagement() {
                 onChange={handleChange}
                 required
               />
+              <p className="text-xs text-gray-500">Price per {form.portionUnit}</p>
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Unit</label>
+              <select
+                name="portionUnit"
+                className="select"
+                value={form.portionUnit}
+                onChange={handleChange}
+                required
+              >
+                {PORTION_UNITS.map((unit) => (
+                  <option key={unit} value={unit}>{unit.charAt(0).toUpperCase() + unit.slice(1)}</option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500">Select unit of measurement</p>
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Full Price (₹)</label>
@@ -349,20 +365,6 @@ export default function MenuManagement() {
                 onChange={handleChange}
               />
               <p className="text-xs text-gray-500">Optional full portion price</p>
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Unit</label>
-              <select
-                name="portionUnit"
-                className="select"
-                value={form.portionUnit}
-                onChange={handleChange}
-              >
-                {PORTION_UNITS.map((unit) => (
-                  <option key={unit} value={unit}>{unit.charAt(0).toUpperCase() + unit.slice(1)}</option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500">Unit of measurement</p>
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Item Image (optional)</label>
