@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import api from "../services/api";
 import { formatCurrency, formatDateTime } from "../utils/format";
-import { Printer as Print, Clock, Calendar, Search } from "lucide-react";
+import { Printer as Print, Clock, Calendar, Search, CreditCard, Smartphone, Eye } from "lucide-react";
 
 export default function SalesHistory() {
   const [bills, setBills] = useState([]);
@@ -11,6 +11,8 @@ export default function SalesHistory() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [search, setSearch] = useState("");
+  const [previewBillData, setPreviewBillData] = useState(null);
+  const [printing, setPrinting] = useState(false);
 
   useEffect(() => {
     loadBills();
@@ -72,79 +74,17 @@ export default function SalesHistory() {
     b.billNumber.toLowerCase().includes(search.toLowerCase())
   );
 
-  const reprintBill = (bill) => {
-    const printContent = generateReceiptHTML(bill);
-    const win = window.open("", "_blank");
-    win.document.write(printContent);
-    win.document.close();
-    win.focus();
-    setTimeout(() => { win.print(); win.close(); }, 500);
+  const previewBill = (bill) => {
+    setPreviewBillData(bill);
   };
 
-  const generateReceiptHTML = (bill) => {
-    const itemsHTML = bill.items
-      .map(
-        (it) => `
-        <tr>
-          <td style="padding:4px 0; border-bottom:1px solid #ddd;">${it.itemName}</td>
-          <td style="padding:4px 0; border-bottom:1px solid #ddd; text-align:center;">${it.quantity}</td>
-          <td style="padding:4px 0; border-bottom:1px solid #ddd; text-align:right;">₹${it.price.toFixed(2)}</td>
-          <td style="padding:4px 0; border-bottom:1px solid #ddd; text-align:right;">₹${it.total.toFixed(2)}</td>
-        </tr>
-      `
-      )
-      .join("");
-
-    return `
-    <html><head><style>
-      body{font-family:Arial,sans-serif;font-size:12px;padding:10px;color:#000;}
-      .receipt{max-width:320px;margin:0 auto;border:2px solid #000;padding:12px;}
-      .header{text-align:center;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:10px;}
-      .logo{width:60px;height:60px;margin:0 auto 6px;object-fit:cover;}
-      .business-name{font-size:18px;font-weight:bold;}
-      .business-details{font-size:12px;line-height:1.4;}
-      .bill-details{font-size:11px;margin-bottom:10px;display:flex;justify-content:space-between;}
-      table{width:100%;border-collapse:collapse;font-size:12px;}
-      th{text-align:left;padding:4px 0;font-weight:bold;border-bottom:1px solid #000;}
-      td{padding:4px 0;}
-      .summary{margin-top:10px;border-top:2px solid #000;padding-top:8px;font-size:13px;}
-      .summary-row{display:flex;justify-content:space-between;margin:3px 0;}
-      .total{font-weight:bold;font-size:15px;border-top:1px solid #000;padding-top:6px;margin-top:6px;}
-      .thankyou{text-align:center;margin-top:12px;font-size:13px;font-weight:bold;}
-      .no-print{display:none;}
-    </style></head><body>
-      <div class="receipt">
-        <div class="header">
-          ${bill.businessLogo ? `<img class="logo" src="${bill.businessLogo}" alt="logo">` : ""}
-          <div class="business-name">${bill.businessName || "Business"}</div>
-          <div class="business-details">
-            ${bill.businessAddress || ""}<br/>
-            ${bill.businessMobile || ""}
-          </div>
-        </div>
-        <div class="bill-details">
-          <div><strong>Bill #:</strong> ${bill.billNumber}</div>
-          <div><strong>Date:</strong> ${formatDateTime(bill.createdAt)}</div>
-        </div>
-        <table>
-          <thead>
-            <tr><th>Item</th><th style="text-align:center">Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Total</th></tr>
-          </thead>
-          <tbody>${itemsHTML}</tbody>
-        </table>
-        <div class="summary">
-          <div class="summary-row"><span>Total Items</span><span>${bill.totalItems}</span></div>
-          <div class="summary-row"><span>Grand Total</span><span>₹${bill.grandTotal.toFixed(2)}</span></div>
-          <div class="total">Amount Payable: ₹${bill.grandTotal.toFixed(2)}</div>
-        </div>
-        <div class="thankyou">Thank You! Visit Again</div>
-      </div>
-    </body></html>
-    `;
+  const closePreview = () => {
+    setPreviewBillData(null);
   };
 
   return (
-    <div className="space-y-6">
+    <>
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
           <Clock className="w-6 h-6 text-indigo-600" /> Sales History
@@ -181,14 +121,15 @@ export default function SalesHistory() {
                 <th className="px-4 py-3">Date & Time</th>
                 <th className="px-4 py-3">Total Items</th>
                 <th className="px-4 py-3">Grand Total</th>
+                <th className="px-4 py-3 text-center">Payment Method</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {loading ? (
-                <tr><td colSpan="5" className="p-4 text-center">Loading...</td></tr>
+                <tr><td colSpan="6" className="p-4 text-center">Loading...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan="5" className="p-8 text-center text-gray-500">No bills found.</td></tr>
+                <tr><td colSpan="6" className="p-8 text-center text-gray-500">No bills found.</td></tr>
               ) : (
                 filtered.map((bill) => (
                   <tr key={bill._id} className="hover:bg-gray-50">
@@ -196,9 +137,21 @@ export default function SalesHistory() {
                     <td className="px-4 py-3 text-sm text-gray-600">{formatDateTime(bill.createdAt)}</td>
                     <td className="px-4 py-3">{bill.totalItems}</td>
                     <td className="px-4 py-3 font-medium">{formatCurrency(bill.grandTotal)}</td>
+                    <td className="px-4 py-3 text-center text-sm">
+                      <span className="flex items-center gap-1">
+                        {bill.paymentMethod === "cash" && <CreditCard className="w-3 h-3 text-gray-600" />}
+                        {bill.paymentMethod === "upi" && <Smartphone className="w-3 h-3 text-gray-600" />}
+                        {bill.paymentMethod === "card" && <CreditCard className="w-3 h-3 text-gray-600" />}
+                        {bill.paymentMethod === "other" && <CreditCard className="w-3 h-3 text-gray-600" />}
+                        {bill.paymentMethod === "upi" ? "UPI" : bill.paymentMethod.charAt(0).toUpperCase() + bill.paymentMethod.slice(1)}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-right">
-                      <button onClick={() => reprintBill(bill)} className="text-xs px-2 py-1 rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100 flex items-center gap-1">
-                        <Print className="w-3 h-3" /> Reprint
+                      <button
+                        onClick={() => previewBill(bill)}
+                        className="text-xs px-2 py-1 rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100 flex items-center gap-1"
+                      >
+                        <Eye className="w-3 h-3" /> Preview
                       </button>
                     </td>
                   </tr>
@@ -209,5 +162,66 @@ export default function SalesHistory() {
         </div>
       </div>
     </div>
+
+    {previewBillData && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={closePreview}>
+        <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-start mb-4">
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">{previewBillData.businessName || "Business"}</h3>
+              <p className="text-xs text-gray-600">{previewBillData.businessAddress || ""}</p>
+            </div>
+            <button onClick={closePreview} className="text-gray-400 hover:text-gray-600">
+              <span className="w-5 h-5">&times;</span>
+            </button>
+          </div>
+          <hr className="border-black mb-4" />
+          <p className="text-sm text-gray-600 mb-4">Bill #{previewBillData.billNumber} - {formatCurrency(previewBillData.grandTotal)}</p>
+
+          <div className="overflow-x-auto mb-4">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="px-2 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Item</th>
+                  <th className="px-2 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Qty</th>
+                  <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Price</th>
+                  <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Total</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {previewBillData.items.map((item) => (
+                  <tr key={item.itemName + item.quantity} className="text-sm">
+                    <td className="px-2 py-2 text-gray-900">{item.itemName}</td>
+                    <td className="px-2 py-2 text-center text-gray-600">{item.quantity}</td>
+                    <td className="px-2 py-2 text-right text-gray-600">₹{Number(item.price).toFixed(2)}</td>
+                    <td className="px-2 py-2 text-right text-gray-900">₹{Number(item.total).toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="flex justify-between text-sm font-bold pt-2 border-t border-gray-200 mb-4">
+            <span>Grand Total</span>
+            <span>₹{Number(previewBillData.grandTotal).toFixed(2)}</span>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => {
+                setPrinting(true);
+                setTimeout(() => { window.print(); setPrinting(false); }, 100);
+              }}
+              className="btn-primary flex-1 text-xs"
+            >
+              <Print className="w-4 h-4 mr-2" /> Print
+            </button>
+            <button onClick={closePreview} className="btn-secondary flex-1 text-xs">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

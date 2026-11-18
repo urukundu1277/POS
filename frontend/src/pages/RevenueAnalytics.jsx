@@ -232,7 +232,7 @@ export default function RevenueAnalytics() {
   };
 
   const paymentChartData = {
-    labels: paymentData.paymentMethods.map((p) => p.method.charAt(0).toUpperCase() + p.method.slice(1)),
+    labels: paymentData.paymentMethods.map((p) => p.method === "upi" ? "UPI" : p.method.charAt(0).toUpperCase() + p.method.slice(1)),
     datasets: [
       {
         label: "Payment Methods",
@@ -448,7 +448,7 @@ export default function RevenueAnalytics() {
                           {method === "cash" && <CreditCard className="w-4 h-4 text-gray-400" />}
                           {method === "upi" && <Smartphone className="w-4 h-4 text-gray-400" />}
                           {method === "card" && <Laptop className="w-4 h-4 text-gray-400" />}
-                          {method.charAt(0).toUpperCase() + method.slice(1)}
+                          {method.charAt(0).toUpperCase() + method.slice(1) === "Upi" ? "UPI" : method.charAt(0).toUpperCase() + method.slice(1)}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">{data.count}</td>
@@ -697,7 +697,7 @@ export default function RevenueAnalytics() {
                         {p.method === "cash" && <CreditCard className="w-4 h-4 text-gray-400" />}
                         {p.method === "upi" && <Smartphone className="w-4 h-4 text-gray-400" />}
                         {p.method === "card" && <Laptop className="w-4 h-4 text-gray-400" />}
-                        {p.method.charAt(0).toUpperCase() + p.method.slice(1)}
+                         {p.method.charAt(0).toUpperCase() + p.method.slice(1) === "Upi" ? "UPI" : p.method.charAt(0).toUpperCase() + p.method.slice(1)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">{p.count}</td>

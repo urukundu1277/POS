@@ -464,7 +464,7 @@ exports.getPaymentAnalytics = async (req, res) => {
       { $match: match },
       {
         $group: {
-          _id: "$paymentMethod",
+          _id: { $toLower: { $ifNull: ["$paymentMethod", "cash"] } },
           amount: { $sum: "$grandTotal" },
           count: { $sum: 1 },
         },

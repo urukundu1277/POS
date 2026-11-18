@@ -11,6 +11,7 @@ import {
   Printer,
   Download,
   AlertCircle,
+  Smartphone,
 } from "lucide-react";
 import { formatCurrency } from "../utils/format";
 
@@ -26,6 +27,7 @@ export default function Dashboard() {
   const [billPreview, setBillPreview] = useState(null);
   const [portionSelection, setPortionSelection] = useState({});
   const [beverageSizeSelection, setBeverageSizeSelection] = useState({});
+  const [paymentMethod, setPaymentMethod] = useState("cash");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -134,7 +136,7 @@ export default function Dashboard() {
     }
     setPrinting(true);
     try {
-      const res = await api.post("/bills/", { items: cart });
+      const res = await api.post("/bills/", { items: cart, paymentMethod: paymentMethod });
       setBillPreview(res.data.bill);
       toast.success("Bill generated successfully");
     } catch (err) {
@@ -419,6 +421,21 @@ export default function Dashboard() {
               <div className="flex justify-between text-base font-bold text-indigo-700 pt-2 border-t border-gray-200">
                 <span>Grand Total</span>
                 <span>{formatCurrency(subtotal)}</span>
+              </div>
+
+              <div className="mt-4">
+                <label className="block text-xs font-medium text-gray-600 uppercase mb-2">Payment Method</label>
+                <div className="flex gap-2">
+                  <label className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer transition-colors ${paymentMethod === "cash" ? "bg-indigo-50 border-indigo-200 text-indigo-700 ring-1 ring-indigo-500" : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"}`} onClick={() => setPaymentMethod("cash")}>
+                    <CreditCard className="w-4 h-4" /> Cash
+                  </label>
+                  <label className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer transition-colors ${paymentMethod === "upi" ? "bg-indigo-50 border-indigo-200 text-indigo-700 ring-1 ring-indigo-500" : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"}`} onClick={() => setPaymentMethod("upi")}>
+                    <Smartphone className="w-4 h-4" /> UPI
+                  </label>
+                  <label className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer transition-colors ${paymentMethod === "card" ? "bg-indigo-50 border-indigo-200 text-indigo-700 ring-1 ring-indigo-500" : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"}`} onClick={() => setPaymentMethod("card")}>
+                    <CreditCard className="w-4 h-4" /> Card
+                  </label>
+                </div>
               </div>
             </div>
 
