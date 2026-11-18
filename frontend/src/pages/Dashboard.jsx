@@ -25,6 +25,7 @@ export default function Dashboard() {
   const [printing, setPrinting] = useState(false);
   const [billPreview, setBillPreview] = useState(null);
   const [portionSelection, setPortionSelection] = useState({});
+  const [beverageSizeSelection, setBeverageSizeSelection] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -232,7 +233,7 @@ export default function Dashboard() {
                         <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Name</th>
                         {filteredItems.some((item) => item.itemType === "beverage") ? (
                           <>
-                            <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-24">Size</th>
+                            <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-32">Size</th>
                             <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-24">Price</th>
                           </>
                         ) : (
@@ -249,26 +250,42 @@ export default function Dashboard() {
                       {filteredItems.map((item) => {
                         const isBeverage = item.itemType === "beverage";
                         if (isBeverage) {
-                          return (item.sizes || []).map((s, idx) => (
-                            <tr key={`${item._id}-${idx}`} className="hover:bg-indigo-50 transition-all duration-200 border-b border-gray-50 last:border-0">
+                          const selectedSize = beverageSizeSelection[item._id] || ((item.sizes || [])[0]?.size || "");
+                          const selectedSizePrice = (item.sizes || []).find((s) => s.size === selectedSize)?.price || 0;
+                          return (
+                            <tr key={item._id} className="hover:bg-indigo-50 transition-all duration-200 border-b border-gray-50 last:border-0">
                               <td className="px-4 py-3">
                                 <div className="font-semibold text-gray-900 text-sm">{item.itemName}</div>
                                 {item.description && (
                                   <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
                                 )}
                               </td>
-                              <td className="px-4 py-3 text-center text-sm text-gray-600">{s.size}</td>
-                              <td className="px-4 py-3 text-center text-sm">{formatCurrency(s.price)}</td>
+                              <td className="px-4 py-3 text-center">
+                                {(item.sizes || []).map((s, idx) => (
+                                  <label key={idx} className="flex items-center gap-1 cursor-pointer text-sm whitespace-nowrap">
+                                    <input
+                                      type="radio"
+                                      name={`beverage-size-${item._id}`}
+                                      value={s.size}
+                                      checked={selectedSize === s.size}
+                                      onChange={() => setBeverageSizeSelection({ ...beverageSizeSelection, [item._id]: s.size })}
+                                      className="w-3 h-3 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                                    />
+                                    {s.size}
+                                  </label>
+                                ))}
+                              </td>
+                              <td className="px-4 py-3 text-center text-sm text-gray-600">{formatCurrency(selectedSizePrice)}</td>
                               <td className="px-4 py-3 text-right">
                                 <button
-                                  onClick={() => addToCart(item, s.size, s.price, 1)}
+                                  onClick={() => addToCart(item, selectedSize, selectedSizePrice, 1)}
                                   className="px-3 py-2 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-1"
                                 >
                                   <span className="w-3 h-3">+</span> Add
                                 </button>
                               </td>
                             </tr>
-                          ));
+                          );
                         }
 
                         const selectedPortion = portionSelection[item._id] || "single";
