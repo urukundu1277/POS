@@ -248,7 +248,6 @@ export default function Dashboard() {
                                   <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
                                 )}
                               </td>
-                              <td className="px-4 py-3 text-center text-sm text-gray-600">—</td>
                               <td className="px-4 py-3 text-center">
                                 {(item.sizes || []).map((s, idx) => (
                                   <div key={idx} className="flex items-center justify-center gap-2">
