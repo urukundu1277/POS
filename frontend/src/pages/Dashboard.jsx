@@ -225,16 +225,15 @@ export default function Dashboard() {
                     <thead>
                       <tr className="bg-indigo-50 border-b border-indigo-200">
                         <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">Name</th>
-                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">Description</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase">Price (₹)</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase">Unit</th>
-                        <th className="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase">Add</th>
+                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase text-center">Price</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase">Single</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase">Full</th>
+                        <th className="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase text-center">Add</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {filteredItems.map((item) => {
                         const price = Number(item.price);
-                        const unit = item.portionUnit || "piece";
                         return (
                           <tr key={item._id} className="hover:bg-indigo-50 transition-all duration-200 border-b border-gray-50 last:border-0">
                             <td className="px-6 py-4">
@@ -247,9 +246,31 @@ export default function Dashboard() {
                               <span className="font-bold text-indigo-600">{formatCurrency(price)}</span>
                             </td>
                             <td className="px-6 py-4 text-center">
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                {unit.charAt(0).toUpperCase() + unit.slice(1)}
-                              </span>
+                              <label className="flex items-center gap-1 cursor-pointer text-sm">
+                                <input
+                                  type="radio"
+                                  name={`portion-${item._id}`}
+                                  value="single"
+                                  checked={true}
+                                  className="w-3 h-3 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                                />
+                                Single
+                              </label>
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              {item.fullPrice ? (
+                                <label className="flex items-center gap-1 cursor-pointer text-sm">
+                                  <input
+                                    type="radio"
+                                    name={`portion-${item._id}`}
+                                    value="full"
+                                    className="w-3 h-3 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                                  />
+                                  Full
+                                </label>
+                              ) : (
+                                <span className="text-xs text-gray-400">—</span>
+                              )}
                             </td>
                             <td className="px-6 py-4 text-right">
                               <button
