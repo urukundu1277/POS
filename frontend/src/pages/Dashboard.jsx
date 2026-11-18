@@ -20,7 +20,7 @@ export default function Dashboard() {
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [cart, setCart] = useState([]);
   const [printing, setPrinting] = useState(false);
   const [billPreview, setBillPreview] = useState(null);
@@ -58,7 +58,7 @@ export default function Dashboard() {
   const filteredItems = (menuItems || []).filter(
     (item) =>
       item && item.itemName &&
-      (selectedCategory === "all" || getCategoryId(item) === selectedCategory) &&
+      (!selectedCategory || getCategoryId(item) === selectedCategory) &&
       item.itemName.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -158,10 +158,7 @@ export default function Dashboard() {
 
   if (loading) return <div className="flex h-full items-center justify-center">Loading...</div>;
 
-  const categoryList = [
-    { id: "all", name: "All Categories" },
-    ...categories.map((c) => ({ id: c._id, name: c.categoryName })),
-  ];
+  const categoryList = categories.map((c) => ({ id: c._id, name: c.categoryName }));
 
   return (
     <div className="space-y-6">
