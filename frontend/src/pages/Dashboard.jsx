@@ -225,11 +225,11 @@ export default function Dashboard() {
                   <table className="w-full text-left border border-gray-200 rounded-xl bg-white shadow-sm">
                     <thead>
                       <tr className="bg-indigo-50 border-b border-indigo-200">
-                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">Name</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase">Price</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase">Single / Full</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase">Price</th>
-                        <th className="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase text-center">Add</th>
+                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Name</th>
+                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-24">Price</th>
+                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-32">Single / Full</th>
+                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-24">Price</th>
+                        <th className="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase text-center w-20">Add</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -238,16 +238,16 @@ export default function Dashboard() {
                         const selectedPrice = selectedPortion === "full" && item.fullPrice ? Number(item.fullPrice) : Number(item.price);
                         return (
                           <tr key={item._id} className="hover:bg-indigo-50 transition-all duration-200 border-b border-gray-50 last:border-0">
-                            <td className="px-6 py-4">
+                            <td className="px-4 py-3">
                               <div className="font-semibold text-gray-900 text-sm">{item.itemName}</div>
                               {item.description && (
                                 <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
                               )}
                             </td>
-                            <td className="px-6 py-4 text-center">
-                              <span className="text-sm text-gray-400">{formatCurrency(Number(item.price))}</span>
+                            <td className="px-4 py-3 text-center text-sm">
+                              <span className="text-gray-600">{formatCurrency(Number(item.price))}</span>
                             </td>
-                            <td className="px-6 py-4 text-center">
+                            <td className="px-4 py-3 text-center">
                               <div className="flex items-center justify-center gap-2">
                                 <label className="flex items-center gap-1 cursor-pointer text-sm">
                                   <input
@@ -275,13 +275,13 @@ export default function Dashboard() {
                                 )}
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-center">
+                            <td className="px-4 py-3 text-center">
                               <span className="font-bold text-indigo-600">{formatCurrency(selectedPrice)}</span>
                             </td>
-                            <td className="px-6 py-4 text-right">
+                            <td className="px-4 py-3 text-right">
                               <button
                                 onClick={() => addToCart(item, selectedPortion, selectedPrice, 1)}
-                                className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-1"
+                                className="px-3 py-2 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-1"
                               >
                                 <span className="w-3 h-3">+</span> Add
                               </button>
