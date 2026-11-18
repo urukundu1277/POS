@@ -12,6 +12,7 @@ import BusinessProfile from "./pages/BusinessProfile";
 import BillPrint from "./pages/BillPrint";
 import SuperAdminLogin from "./pages/SuperAdminLogin";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
+import RevenueAnalytics from "./pages/RevenueAnalytics";
 import { AuthProvider } from "./context/AuthContext";
 
 function AppRoutes() {
@@ -64,6 +65,16 @@ function AppRoutes() {
             <ProtectedRoute>
               <Navbar>
                 <SalesHistory />
+              </Navbar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/revenue"
+          element={
+            <ProtectedRoute>
+              <Navbar>
+                <RevenueAnalytics />
               </Navbar>
             </ProtectedRoute>
           }

@@ -57,12 +57,24 @@ exports.createBill = async (req, res) => {
     const billCount = await Bill.countDocuments({ businessId: req.user.businessId });
     const billNumber = `BILL-${String(billCount + 1).padStart(5, "0")}`;
 
+    const subtotal = Number(req.body.subtotal) || grandTotal;
+    const discount = Number(req.body.discount) || 0;
+    const tax = Number(req.body.tax) || 0;
+    const finalGrandTotal = Number(req.body.grandTotal) || grandTotal;
+    const paymentMethod = req.body.paymentMethod || "cash";
+    const status = req.body.status || "paid";
+
     const bill = await Bill.create({
       businessId: req.user.businessId,
       billNumber,
       items: processedItems,
       totalItems,
-      grandTotal,
+      subtotal,
+      discount,
+      tax,
+      grandTotal: finalGrandTotal,
+      paymentMethod,
+      status,
       businessName: businessName,
       businessAddress: businessAddress,
       businessMobile: businessMobile,

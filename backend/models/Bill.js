@@ -24,7 +24,12 @@ const billSchema = new mongoose.Schema(
     businessLogo: { type: String, default: "" },
     items: [billItemSchema],
     totalItems: { type: Number, required: true },
+    subtotal: { type: Number, default: 0 },
+    discount: { type: Number, default: 0 },
+    tax: { type: Number, default: 0 },
     grandTotal: { type: Number, required: true },
+    paymentMethod: { type: String, enum: ["cash", "upi", "card", "other"], default: "cash" },
+    status: { type: String, enum: ["paid", "cancelled", "refunded", "pending"], default: "paid" },
   },
   { timestamps: true }
 );

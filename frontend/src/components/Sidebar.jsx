@@ -9,6 +9,7 @@ import {
   LogOut,
   Menu,
   ChevronRight,
+  BarChart3,
 } from "lucide-react";
 
 const navItems = [
@@ -16,6 +17,7 @@ const navItems = [
   { path: "/categories", label: "Categories", icon: SquareMenu },
   { path: "/menu", label: "Menu Management", icon: ShoppingCart },
   { path: "/sales", label: "Sales History", icon: FileText },
+  { path: "/revenue", label: "Revenue Analytics", icon: BarChart3 },
   { path: "/profile", label: "Business Profile", icon: Building },
 ];
 
