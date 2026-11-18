@@ -9,6 +9,8 @@ const businessSchema = new mongoose.Schema(
     email: { type: String, required: true, lowercase: true, trim: true },
     address: { type: String, required: true, trim: true },
     businessType: { type: String, required: true, trim: true },
+    gstNumber: { type: String, trim: true, default: "" },
+    status: { type: String, enum: ["active", "inactive"], default: "active" },
   },
   { timestamps: true }
 );

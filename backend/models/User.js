@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true },
     businessId: { type: mongoose.Schema.Types.ObjectId, ref: "Business", required: true },
+    role: { type: String, enum: ["business_user"], default: "business_user" },
+    status: { type: String, enum: ["active", "inactive"], default: "active" },
   },
   { timestamps: true }
 );

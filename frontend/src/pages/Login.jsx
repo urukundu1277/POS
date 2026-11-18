@@ -77,10 +77,7 @@ export default function Login() {
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-500">
-            Don't have an account?{" "}
-            <a href="/register" className="text-indigo-600 hover:text-indigo-500 font-medium">
-              Create account
-            </a>
+            All business accounts are created by the Super Admin.
           </p>
         </div>
       </div>

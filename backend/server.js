@@ -13,6 +13,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/admin", require("./routes/superAdminRoutes"));
 app.use("/api/business", require("./routes/businessRoutes"));
 app.use("/api/categories", require("./routes/categoryRoutes"));
 app.use("/api/menu-items", require("./routes/menuItemRoutes"));

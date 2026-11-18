@@ -2,14 +2,16 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Categories from "./pages/Categories";
 import MenuManagement from "./pages/MenuManagement";
 import SalesHistory from "./pages/SalesHistory";
 import BusinessProfile from "./pages/BusinessProfile";
 import BillPrint from "./pages/BillPrint";
+import SuperAdminLogin from "./pages/SuperAdminLogin";
+import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import { AuthProvider } from "./context/AuthContext";
 
 function AppRoutes() {
@@ -17,7 +19,15 @@ function AppRoutes() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/admin/login" element={<SuperAdminLogin />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminProtectedRoute>
+              <SuperAdminDashboard />
+            </AdminProtectedRoute>
+          }
+        />
         <Route
           path="/"
           element={

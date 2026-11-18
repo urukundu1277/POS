@@ -71,9 +71,22 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password." });
     }
 
+    if (user.status !== "active") {
+      return res.status(403).json({ message: "Your account is inactive. Please contact the administrator." });
+    }
+
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password." });
+    }
+
+    const business = await Business.findById(user.businessId);
+    if (!business) {
+      return res.status(404).json({ message: "Business profile not found." });
+    }
+
+    if (business.status !== "active") {
+      return res.status(403).json({ message: "Your business account is inactive. Please contact the administrator." });
     }
 
     const token = generateToken(user._id, user.businessId);
@@ -86,6 +99,12 @@ exports.login = async (req, res) => {
         name: user.name,
         email: user.email,
         businessId: user.businessId,
+        status: user.status,
+      },
+      business: {
+        id: business._id,
+        businessName: business.businessName,
+        status: business.status,
       },
     });
   } catch (error) {
