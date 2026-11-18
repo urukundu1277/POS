@@ -367,7 +367,7 @@ export default function MenuManagement() {
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
         onClick={closeModal}
       >
-        <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
           <h3 className="text-lg font-bold text-gray-900 mb-4">{editing ? "Edit Menu Item" : "Add Menu Item"}</h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
