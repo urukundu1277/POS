@@ -83,7 +83,11 @@ exports.getBills = async (req, res) => {
     const { startDate, endDate } = req.query;
     const filter = { businessId: req.user.businessId };
     if (startDate && endDate) {
-      filter.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      filter.createdAt = { $gte: start, $lte: end };
     }
     const bills = await Bill.find(filter).sort({ createdAt: -1 });
     res.json({ bills });

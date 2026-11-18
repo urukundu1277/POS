@@ -18,11 +18,11 @@ export default function SalesHistory() {
 
   const loadBills = async () => {
     try {
-      let params = "";
-      if (filter === "custom" && startDate && endDate) {
-        params = `?startDate=${startDate}&endDate=${endDate}`;
-      }
-      const res = await api.get(`/bills/${params}`);
+      const params = [];
+      if (startDate) params.push(`startDate=${startDate}`);
+      if (endDate) params.push(`endDate=${endDate}`);
+      const queryString = params.length > 0 ? `?${params.join("&")}` : "";
+      const res = await api.get(`/bills/${queryString}`);
       setBills(res.data.bills);
     } catch (err) {
       toast.error("Failed to load bills");
@@ -33,8 +33,10 @@ export default function SalesHistory() {
 
   const dateRange = (days) => {
     const end = new Date();
+    end.setHours(23, 59, 59, 999);
     const start = new Date();
-    start.setDate(end.getDate() - days);
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - days);
     return { start: start.toISOString().split("T")[0], end: end.toISOString().split("T")[0] };
   };
 
@@ -42,14 +44,19 @@ export default function SalesHistory() {
     setFilter(type);
     setStartDate("");
     setEndDate("");
+    const d = new Date().toISOString().split("T")[0];
     if (type === "today") {
-      const d = new Date().toISOString().split("T")[0];
       setStartDate(d);
       setEndDate(d);
     } else if (type === "yesterday") {
-      const { start, end } = dateRange(1);
-      setStartDate(start);
-      setEndDate(end);
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(23, 59, 59, 999);
+      const yStart = new Date();
+      yStart.setDate(yStart.getDate() - 1);
+      yStart.setHours(0, 0, 0, 0);
+      setStartDate(yStart.toISOString().split("T")[0]);
+      setEndDate(yesterday.toISOString().split("T")[0]);
     } else if (type === "week") {
       const { start, end } = dateRange(7);
       setStartDate(start);
