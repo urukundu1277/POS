@@ -180,19 +180,19 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-8">
-          <div className="card p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
-              <div className="relative w-48">
-                <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-                <input
-                  className="input pl-9"
-                  placeholder="Search menu items..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
+            <div className="card p-4">
+              <div className="flex flex-col items-center gap-4 mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 w-full text-center">Menu</h2>
+                <div className="relative w-48">
+                  <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                  <input
+                    className="input pl-9"
+                    placeholder="Search menu items..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
 
             <div className="overflow-x-auto pb-2">
               <div className="flex gap-2 min-w-fit">
