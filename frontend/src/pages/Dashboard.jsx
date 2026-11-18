@@ -24,6 +24,7 @@ export default function Dashboard() {
   const [cart, setCart] = useState([]);
   const [printing, setPrinting] = useState(false);
   const [billPreview, setBillPreview] = useState(null);
+  const [portionSelection, setPortionSelection] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -60,13 +61,13 @@ export default function Dashboard() {
       item.itemName.toLowerCase().includes(search.toLowerCase())
   );
 
-  const addToCart = (item, portionType, price) => {
+  const addToCart = (item, portionType, price, quantity = 1) => {
     setCart((prev) => {
       const existing = prev.find((c) => c.itemId === item._id && c.portionType === portionType);
       if (existing) {
         return prev.map((c) =>
           c.itemId === item._id && c.portionType === portionType
-            ? { ...c, quantity: c.quantity + 1 }
+            ? { ...c, quantity: c.quantity + quantity }
             : c
         );
       }
@@ -76,13 +77,13 @@ export default function Dashboard() {
         categoryId: getCategoryId(item),
         categoryName: item.categoryId && typeof item.categoryId === "object" ? item.categoryId.categoryName : "",
         price: price,
-        quantity: 1,
+        quantity: quantity,
         portionType,
         unitPrice: price,
         portionUnit: item.portionUnit || "",
       }];
     });
-    toast.success(`${item.itemName} (${portionType}) added to cart`);
+    toast.success(`${item.itemName} (${portionType}) x${quantity} added to cart`);
   };
 
   const increaseQty = (itemId, portionType) => {
@@ -225,15 +226,16 @@ export default function Dashboard() {
                     <thead>
                       <tr className="bg-indigo-50 border-b border-indigo-200">
                         <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">Name</th>
-                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase text-center">Price</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase">Single</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase">Full</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase">Price</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase">Single / Full</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase">Price</th>
                         <th className="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase text-center">Add</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {filteredItems.map((item) => {
-                        const price = Number(item.price);
+                        const selectedPortion = portionSelection[item._id] || "single";
+                        const selectedPrice = selectedPortion === "full" && item.fullPrice ? Number(item.fullPrice) : Number(item.price);
                         return (
                           <tr key={item._id} className="hover:bg-indigo-50 transition-all duration-200 border-b border-gray-50 last:border-0">
                             <td className="px-6 py-4">
@@ -243,38 +245,42 @@ export default function Dashboard() {
                               )}
                             </td>
                             <td className="px-6 py-4 text-center">
-                              <span className="font-bold text-indigo-600">{formatCurrency(price)}</span>
+                              <span className="text-sm text-gray-400">{formatCurrency(Number(item.price))}</span>
                             </td>
                             <td className="px-6 py-4 text-center">
-                              <label className="flex items-center gap-1 cursor-pointer text-sm">
-                                <input
-                                  type="radio"
-                                  name={`portion-${item._id}`}
-                                  value="single"
-                                  checked={true}
-                                  className="w-3 h-3 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                                />
-                                Single
-                              </label>
-                            </td>
-                            <td className="px-6 py-4 text-center">
-                              {item.fullPrice ? (
+                              <div className="flex items-center justify-center gap-2">
                                 <label className="flex items-center gap-1 cursor-pointer text-sm">
                                   <input
                                     type="radio"
                                     name={`portion-${item._id}`}
-                                    value="full"
+                                    value="single"
+                                    checked={selectedPortion === "single"}
+                                    onChange={() => setPortionSelection({ ...portionSelection, [item._id]: "single" })}
                                     className="w-3 h-3 text-indigo-600 border-gray-300 focus:ring-indigo-500"
                                   />
-                                  Full
+                                  Single
                                 </label>
-                              ) : (
-                                <span className="text-xs text-gray-400">—</span>
-                              )}
+                                {item.fullPrice && (
+                                  <label className="flex items-center gap-1 cursor-pointer text-sm">
+                                    <input
+                                      type="radio"
+                                      name={`portion-${item._id}`}
+                                      value="full"
+                                      checked={selectedPortion === "full"}
+                                      onChange={() => setPortionSelection({ ...portionSelection, [item._id]: "full" })}
+                                      className="w-3 h-3 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                                    />
+                                    Full
+                                  </label>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <span className="font-bold text-indigo-600">{formatCurrency(selectedPrice)}</span>
                             </td>
                             <td className="px-6 py-4 text-right">
                               <button
-                                onClick={() => addToCart(item, "single", price)}
+                                onClick={() => addToCart(item, selectedPortion, selectedPrice, 1)}
                                 className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-1"
                               >
                                 <span className="w-3 h-3">+</span> Add
