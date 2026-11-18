@@ -248,6 +248,18 @@ export default function Dashboard() {
                                   <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
                                 )}
                               </td>
+                              <td className="px-4 py-3 text-center">
+                                {(item.sizes || []).map((s, idx) => (
+                                  <div key={idx} className="flex items-center justify-center gap-2">
+                                    <span className="text-xs text-gray-600">{s.size}</span>
+                                  </div>
+                                ))}
+                              </td>
+                              <td className="px-4 py-3 text-center">
+                                {(item.sizes || []).map((s, idx) => (
+                                  <div key={idx} className="font-bold text-indigo-600">{formatCurrency(s.price)}</div>
+                                ))}
+                              </td>
                               <td className="px-4 py-3 text-right">
                                 {(item.sizes || []).map((s, idx) => (
                                   <button
