@@ -231,7 +231,7 @@ export default function Dashboard() {
                       <tr className="bg-indigo-50 border-b border-indigo-200">
                         <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Name</th>
                         <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-24">Price</th>
-                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-32">Single / Full</th>
+                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-32">OPTIONS</th>
                         <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-24">Price</th>
                         <th className="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase text-center w-20">Add</th>
                       </tr>
