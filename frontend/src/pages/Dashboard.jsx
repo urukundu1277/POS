@@ -230,9 +230,18 @@ export default function Dashboard() {
                     <thead>
                       <tr className="bg-indigo-50 border-b border-indigo-200">
                         <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Name</th>
-                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-24">Price</th>
-                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-32">OPTIONS</th>
-                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-24">Price</th>
+                        {filteredItems.some((item) => item.itemType === "beverage") ? (
+                          <>
+                            <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-24">Size</th>
+                            <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-24">Price</th>
+                          </>
+                        ) : (
+                          <>
+                            <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-24">Base Price</th>
+                            <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-32">OPTIONS</th>
+                            <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-24">Price</th>
+                          </>
+                        )}
                         <th className="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase text-center w-20">Add</th>
                       </tr>
                     </thead>
@@ -240,39 +249,26 @@ export default function Dashboard() {
                       {filteredItems.map((item) => {
                         const isBeverage = item.itemType === "beverage";
                         if (isBeverage) {
-                          return (
-                            <tr key={`${item._id}-beverage-row`} className="hover:bg-indigo-50 transition-all duration-200 border-b border-gray-50 last:border-0">
+                          return (item.sizes || []).map((s, idx) => (
+                            <tr key={`${item._id}-${idx}`} className="hover:bg-indigo-50 transition-all duration-200 border-b border-gray-50 last:border-0">
                               <td className="px-4 py-3">
                                 <div className="font-semibold text-gray-900 text-sm">{item.itemName}</div>
                                 {item.description && (
                                   <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
                                 )}
                               </td>
-                              <td className="px-4 py-3 text-center">
-                                {(item.sizes || []).map((s, idx) => (
-                                  <div key={idx} className="flex items-center justify-center gap-2">
-                                    <span className="text-xs text-gray-600">{s.size}</span>
-                                  </div>
-                                ))}
-                              </td>
-                              <td className="px-4 py-3 text-center">
-                                {(item.sizes || []).map((s, idx) => (
-                                  <div key={idx} className="font-bold text-indigo-600">{formatCurrency(s.price)}</div>
-                                ))}
-                              </td>
+                              <td className="px-4 py-3 text-center text-sm text-gray-600">{s.size}</td>
+                              <td className="px-4 py-3 text-center text-sm">{formatCurrency(s.price)}</td>
                               <td className="px-4 py-3 text-right">
-                                {(item.sizes || []).map((s, idx) => (
-                                  <button
-                                    key={idx}
-                                    onClick={() => addToCart(item, s.size, s.price, 1)}
-                                    className="px-3 py-2 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-1"
-                                  >
-                                    <span className="w-3 h-3">+</span> Add
-                                  </button>
-                                ))}
+                                <button
+                                  onClick={() => addToCart(item, s.size, s.price, 1)}
+                                  className="px-3 py-2 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-1"
+                                >
+                                  <span className="w-3 h-3">+</span> Add
+                                </button>
                               </td>
                             </tr>
-                          );
+                          ));
                         }
 
                         const selectedPortion = portionSelection[item._id] || "single";
