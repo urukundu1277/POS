@@ -10,19 +10,35 @@ import {
   X,
   Search,
   SlidersHorizontal,
+  Droplet,
+  Minus,
 } from "lucide-react";
 import { formatCurrency } from "../utils/format";
+
+const DEFAULT_SIZES = ["250 ml", "300 ml", "500 ml", "600 ml", "750 ml", "1 L", "1.5 L", "2 L"];
 
 export default function MenuManagement() {
   const [menuItems, setMenuItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ itemName: "", categoryId: "", description: "", price: "", fullPrice: "", status: "active", image: "" });
+  const [form, setForm] = useState({
+    itemName: "",
+    categoryId: "",
+    description: "",
+    itemType: "fast_food",
+    price: "",
+    fullPrice: "",
+    portionUnit: "piece",
+    sizes: [],
+    status: "active",
+    image: "",
+  });
   const [editing, setEditing] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
+  const [filterItemType, setFilterItemType] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
@@ -48,6 +64,29 @@ export default function MenuManagement() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleSizeChange = (index, field, value) => {
+    const newSizes = [...form.sizes];
+    newSizes[index][field] = value;
+    setForm({ ...form, sizes: newSizes });
+  };
+
+  const addSize = () => {
+    setForm({ ...form, sizes: [...form.sizes, { size: "", price: "" }] });
+  };
+
+  const removeSize = (index) => {
+    setForm({ ...form, sizes: form.sizes.filter((_, i) => i !== index) });
+  };
+
+  const handleItemTypeChange = (value) => {
+    setForm({ ...form, itemType: value });
+    if (value === "beverage") {
+      setForm({ ...form, sizes: DEFAULT_SIZES.map((s) => ({ size: s, price: "" })) });
+    } else {
+      setForm({ ...form, sizes: [] });
+    }
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -59,7 +98,14 @@ export default function MenuManagement() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ itemName: "", categoryId: "", description: "", price: "", fullPrice: "", status: "active", image: "" });
+    setForm({ itemName: "", categoryId: "", description: "", itemType: "fast_food", price: "", fullPrice: "", portionUnit: "piece", sizes: [], status: "active", image: "" });
+    setImagePreview("");
+    setModalOpen(true);
+  };
+
+  const openAddBeverage = () => {
+    setEditing(null);
+    setForm({ itemName: "", categoryId: "", description: "", itemType: "beverage", price: "", fullPrice: "", portionUnit: "", sizes: DEFAULT_SIZES.map((s) => ({ size: s, price: "" })), status: "active", image: "" });
     setImagePreview("");
     setModalOpen(true);
   };
@@ -70,8 +116,11 @@ export default function MenuManagement() {
       itemName: item.itemName,
       categoryId: item.categoryId,
       description: item.description,
-      price: item.price,
-      fullPrice: item.fullPrice,
+      itemType: item.itemType || "fast_food",
+      price: item.price || "",
+      fullPrice: item.fullPrice || "",
+      portionUnit: item.portionUnit || "",
+      sizes: item.sizes || [],
       status: item.status,
       image: item.image,
     });
@@ -87,9 +136,15 @@ export default function MenuManagement() {
       formData.append("itemName", form.itemName);
       formData.append("categoryId", form.categoryId);
       formData.append("description", form.description);
-      formData.append("price", form.price);
-      formData.append("fullPrice", form.fullPrice);
+      formData.append("itemType", form.itemType);
       formData.append("status", form.status);
+      if (form.itemType === "fast_food") {
+        formData.append("price", form.price);
+        formData.append("fullPrice", form.fullPrice);
+        formData.append("portionUnit", form.portionUnit);
+      } else {
+        formData.append("sizes", JSON.stringify(form.sizes));
+      }
       if (imagePreview && imagePreview.startsWith("data:")) {
         const blob = await (await fetch(imagePreview)).blob();
         formData.append("image", blob, "image.png");
@@ -148,7 +203,8 @@ export default function MenuManagement() {
     (item) =>
       item && item.itemName &&
       item.itemName.toLowerCase().includes(search.toLowerCase()) &&
-      (!filterCategory || item.categoryId === filterCategory)
+      (!filterCategory || item.categoryId === filterCategory) &&
+      (!filterItemType || item.itemType === filterItemType)
   );
 
   return (
@@ -158,12 +214,20 @@ export default function MenuManagement() {
           <Plus className="w-6 h-6 text-indigo-600" />
           <h1 className="text-xl font-bold text-gray-900">Menu Management</h1>
         </div>
-        <button
-          onClick={openAdd}
-          className="btn-primary flex items-center gap-2 px-4 py-2 text-sm"
-        >
-          <Plus className="w-4 h-4" /> Add Item
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={openAdd}
+            className="btn-primary flex items-center gap-2 px-4 py-2 text-sm"
+          >
+            <Plus className="w-4 h-4" /> Add Fast Food
+          </button>
+          <button
+            onClick={openAddBeverage}
+            className="btn-primary flex items-center gap-2 px-4 py-2 text-sm"
+          >
+            <Droplet className="w-4 h-4" /> Add Beverage
+          </button>
+        </div>
       </div>
 
       <div className="card p-4">
@@ -208,9 +272,9 @@ export default function MenuManagement() {
             <thead>
               <tr className="bg-gray-50 text-xs text-gray-600 uppercase border-b">
                 <th className="px-4 py-3">Item</th>
+                <th className="px-4 py-3">Type</th>
                 <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3">Single Price</th>
-                <th className="px-4 py-3">Full Price</th>
+                <th className="px-4 py-3">Prices</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
@@ -226,6 +290,7 @@ export default function MenuManagement() {
                 filtered.map((item) => {
                   if (!item) return null;
                   const catName = (item.categoryId && typeof item.categoryId === 'object' && item.categoryId.categoryName) || (categoryMap[item.categoryId]) || "—";
+                  const isBeverage = item.itemType === "beverage";
                   return (
                     <tr key={item._id || item.itemName} className="hover:bg-gray-50">
                       <td className="px-4 py-3">
@@ -241,9 +306,28 @@ export default function MenuManagement() {
                         </div>
                         <p className="text-xs text-gray-500">{item.description || ""}</p>
                       </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        <span className={`badge ${item.itemType === "beverage" ? "badge-active" : "badge-inactive"}`}>
+                          {item.itemType === "beverage" ? "Beverage" : "Fast Food"}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 text-sm text-gray-600">{catName}</td>
-                      <td className="px-4 py-3">{item.price != null ? formatCurrency(item.price) : "—"}</td>
-                      <td className="px-4 py-3">{item.fullPrice != null ? formatCurrency(item.fullPrice) : "—"}</td>
+                      <td className="px-4 py-3">
+                        {isBeverage ? (
+                          <div className="space-y-1">
+                            {(item.sizes || []).map((s, idx) => (
+                              <div key={idx} className="text-xs">
+                                {s.size}: {formatCurrency(s.price)}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="space-y-1">
+                            <div className="text-xs">Single: {item.price != null ? formatCurrency(item.price) : "—"}</div>
+                            {item.fullPrice != null ? <div className="text-xs">Full: {formatCurrency(item.fullPrice)}</div> : null}
+                          </div>
+                        )}
+                      </td>
                       <td className="px-4 py-3">
                         <span className={`badge ${item.status === "active" ? "badge-active" : "badge-inactive"}`}>
                           {item.status || "active"}
@@ -324,34 +408,113 @@ export default function MenuManagement() {
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Price (₹)</label>
-              <input
-                name="price"
-                type="number"
-                min="0"
-                step="0.01"
-                className="input"
-                placeholder="0.00"
-                value={form.price}
-                onChange={handleChange}
-                required
-              />
-              <p className="text-xs text-gray-500">Price per single portion</p>
+              <label className="block text-sm font-medium text-gray-700">Item Type</label>
+              <select
+                name="itemType"
+                className="select"
+                value={form.itemType}
+                onChange={(e) => handleItemTypeChange(e.target.value)}
+              >
+                <option value="fast_food">Fast Food</option>
+                <option value="beverage">Beverage</option>
+              </select>
             </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Full Price (₹)</label>
-              <input
-                name="fullPrice"
-                type="number"
-                min="0"
-                step="0.01"
-                className="input"
-                placeholder="0.00"
-                value={form.fullPrice}
-                onChange={handleChange}
-              />
-              <p className="text-xs text-gray-500">Optional full portion price</p>
-            </div>
+            {form.itemType === "fast_food" ? (
+              <>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Price (₹)</label>
+                  <input
+                    name="price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="input"
+                    placeholder="0.00"
+                    value={form.price}
+                    onChange={handleChange}
+                    required
+                  />
+                  <p className="text-xs text-gray-500">Price per single portion</p>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Full Price (₹)</label>
+                  <input
+                    name="fullPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="input"
+                    placeholder="0.00"
+                    value={form.fullPrice}
+                    onChange={handleChange}
+                  />
+                  <p className="text-xs text-gray-500">Optional full portion price</p>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Unit</label>
+                  <select
+                    name="portionUnit"
+                    className="select"
+                    value={form.portionUnit}
+                    onChange={handleChange}
+                  >
+                    <option value="piece">Piece</option>
+                    <option value="kg">Kg</option>
+                    <option value="liter">Liter</option>
+                    <option value="gram">Gram</option>
+                    <option value="ml">Ml</option>
+                    <option value="dozen">Dozen</option>
+                  </select>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Beverage Sizes & Prices</label>
+                  <p className="text-xs text-gray-500">Configure each available size with its price.</p>
+                  <div className="space-y-2">
+                    {form.sizes.map((size, index) => (
+                      <div key={index} className="flex gap-2">
+                        <input
+                          name={`sizes[${index}].size`}
+                          type="text"
+                          placeholder="e.g. 250 ml"
+                          value={size.size}
+                          onChange={(e) => handleSizeChange(index, "size", e.target.value)}
+                          className="input text-sm"
+                          placeholder="Size"
+                        />
+                        <input
+                          name={`sizes[${index}].price`}
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={size.price}
+                          onChange={(e) => handleSizeChange(index, "price", e.target.value)}
+                          className="input text-sm w-24"
+                          placeholder="Price"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeSize(index)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addSize}
+                      className="text-xs px-2 py-1 rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                    >
+                      <Plus className="w-3 h-3 mr-1" /> Add Size
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Item Image (optional)</label>
               <input type="file" accept="image/*" onChange={handleImageChange} className="block w-full text-sm text-gray-600" />

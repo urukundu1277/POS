@@ -62,11 +62,13 @@ export default function Dashboard() {
   );
 
   const addToCart = (item, portionType, price, quantity = 1) => {
+    const itemType = item.itemType || "fast_food";
+    const sizeOrPortion = itemType === "beverage" ? portionType : portionType;
     setCart((prev) => {
-      const existing = prev.find((c) => c.itemId === item._id && c.portionType === portionType);
+      const existing = prev.find((c) => c.itemId === item._id && c.portionType === portionType && (itemType === "beverage" ? c.size === portionType : true));
       if (existing) {
         return prev.map((c) =>
-          c.itemId === item._id && c.portionType === portionType
+          c.itemId === item._id && c.portionType === portionType && (itemType === "beverage" ? c.size === portionType : true)
             ? { ...c, quantity: c.quantity + quantity }
             : c
         );
@@ -74,11 +76,13 @@ export default function Dashboard() {
       return [...prev, {
         itemId: item._id,
         itemName: item.itemName,
+        itemType: itemType,
         categoryId: getCategoryId(item),
         categoryName: item.categoryId && typeof item.categoryId === "object" ? item.categoryId.categoryName : "",
         price: price,
         quantity: quantity,
-        portionType,
+        portionType: portionType,
+        size: itemType === "beverage" ? portionType : undefined,
         unitPrice: price,
         portionUnit: item.portionUnit || "",
       }];
@@ -234,6 +238,44 @@ export default function Dashboard() {
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {filteredItems.map((item) => {
+                        const isBeverage = item.itemType === "beverage";
+                        if (isBeverage) {
+                          return (
+                            <tr key={`${item._id}-beverage-row`} className="hover:bg-indigo-50 transition-all duration-200 border-b border-gray-50 last:border-0">
+                              <td className="px-4 py-3">
+                                <div className="font-semibold text-gray-900 text-sm">{item.itemName}</div>
+                                {item.description && (
+                                  <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-center text-sm text-gray-600">—</td>
+                              <td className="px-4 py-3 text-center">
+                                {(item.sizes || []).map((s, idx) => (
+                                  <div key={idx} className="flex items-center justify-center gap-2">
+                                    <span className="text-xs text-gray-600">{s.size}</span>
+                                  </div>
+                                ))}
+                              </td>
+                              <td className="px-4 py-3 text-center">
+                                {(item.sizes || []).map((s, idx) => (
+                                  <div key={idx} className="font-bold text-indigo-600">{formatCurrency(s.price)}</div>
+                                ))}
+                              </td>
+                              <td className="px-4 py-3 text-right">
+                                {(item.sizes || []).map((s, idx) => (
+                                  <button
+                                    key={idx}
+                                    onClick={() => addToCart(item, s.size, s.price, 1)}
+                                    className="px-3 py-2 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-1"
+                                  >
+                                    <span className="w-3 h-3">+</span> Add
+                                  </button>
+                                ))}
+                              </td>
+                            </tr>
+                          );
+                        }
+
                         const selectedPortion = portionSelection[item._id] || "single";
                         const selectedPrice = selectedPortion === "full" && item.fullPrice ? Number(item.fullPrice) : Number(item.price);
                         return (
@@ -310,45 +352,49 @@ export default function Dashboard() {
                   <p className="text-xs text-gray-400">Add items from the menu</p>
                 </div>
               ) : (
-                cart.map((item) => (
-                  <div key={`${item.itemId}-${item.portionType}`} className="flex items-center gap-3 bg-gray-50 rounded-lg p-2 border border-gray-200">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-sm font-medium text-gray-900">{item.itemName}</span>
-                        <span className="text-xs text-gray-500">{item.portionType === "full" ? "Full" : "Single"} ×{item.quantity}</span>
+                cart.map((item) => {
+                  const isBeverageCart = item.itemType === "beverage";
+                   const sizeLabel = isBeverageCart ? item.size : (item.portionType === "full" ? "Full" : "Single");
+                  return (
+                    <div key={`${item.itemId}-${item.size || item.portionType}`} className="flex items-center gap-3 bg-gray-50 rounded-lg p-2 border border-gray-200">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-sm font-medium text-gray-900">{item.itemName}</span>
+                           <span className="text-xs text-gray-500">{isBeverageCart ? item.size : item.portionType === "full" ? "Full" : "Single"} ×{item.quantity}</span>
+                        </div>
+                        <span className="text-xs text-gray-500">{formatCurrency(item.price)} each</span>
                       </div>
-                      <span className="text-xs text-gray-500">{formatCurrency(item.price)} each</span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => decreaseQty(item.itemId, item.size || item.portionType)}
+                          className="w-7 h-7 rounded bg-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-300"
+                        >
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <input
+                          type="number"
+                          min="1"
+                          value={item.quantity}
+                          onChange={(e) => setQuantity(item.itemId, item.size || item.portionType, e.target.value)}
+                          className="w-8 text-center text-sm border border-gray-300 rounded px-1"
+                        />
+                        <button
+                          onClick={() => increaseQty(item.itemId, item.size || item.portionType)}
+                          className="w-7 h-7 rounded bg-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-300"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => removeItem(item.itemId, item.size || item.portionType)}
+                          className="ml-2 text-gray-400 hover:text-red-600"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <span className="font-medium text-gray-900">{formatCurrency(item.price * item.quantity)}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => decreaseQty(item.itemId, item.portionType)}
-                        className="w-7 h-7 rounded bg-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-300"
-                      >
-                        <Minus className="w-3 h-3" />
-                      </button>
-                      <input
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) => setQuantity(item.itemId, item.portionType, e.target.value)}
-                        className="w-8 text-center text-sm border border-gray-300 rounded px-1"
-                      />
-                      <button
-                        onClick={() => increaseQty(item.itemId, item.portionType)}
-                        className="w-7 h-7 rounded bg-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-300"
-                      >
-                        <Plus className="w-3 h-3" />
-                      </button>
-                      <button
-                        onClick={() => removeItem(item.itemId, item.portionType)}
-                        className="ml-2 text-gray-400 hover:text-red-600"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <span className="font-medium text-gray-900">{formatCurrency(item.price * item.quantity)}</span>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 

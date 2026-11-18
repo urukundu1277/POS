@@ -3,10 +3,31 @@ const Category = require("../models/Category");
 
 exports.createMenuItem = async (req, res) => {
   try {
-    const { itemName, categoryId, description, price, fullPrice, status, portionUnit } = req.body;
+    const { itemName, categoryId, description, price, fullPrice, status, portionUnit, itemType, sizes } = req.body;
 
-    if (!itemName || !categoryId || price === undefined || price === null) {
-      return res.status(400).json({ message: "Item name, category, and price are required." });
+    if (!itemName || !categoryId) {
+      return res.status(400).json({ message: "Item name and category are required." });
+    }
+
+    let parsedSizes = [];
+    if (itemType === "beverage") {
+      try {
+        parsedSizes = typeof sizes === "string" ? JSON.parse(sizes) : (sizes || []);
+      } catch (e) {
+        return res.status(400).json({ message: "Invalid sizes format." });
+      }
+      if (!parsedSizes || parsedSizes.length === 0) {
+        return res.status(400).json({ message: "At least one size with price is required for beverages." });
+      }
+      for (const s of parsedSizes) {
+        if (!s.size || s.price === undefined || s.price === null || s.price < 0) {
+          return res.status(400).json({ message: "Each beverage size must have a name and valid price." });
+        }
+      }
+    } else {
+      if (price === undefined || price === null || price < 0) {
+        return res.status(400).json({ message: "Item price is required." });
+      }
     }
 
     const category = await Category.findOne({
@@ -27,11 +48,13 @@ exports.createMenuItem = async (req, res) => {
       categoryId,
       itemName,
       description: description || "",
-      price: Number(price),
-      fullPrice: Number(fullPrice) || 0,
+      itemType: itemType || "fast_food",
+      price: itemType === "beverage" ? undefined : Number(price),
+      fullPrice: itemType === "fast_food" ? (Number(fullPrice) || 0) : undefined,
+      portionUnit: itemType === "fast_food" ? (portionUnit || "piece") : undefined,
+      sizes: itemType === "beverage" ? parsedSizes : [],
       image,
       status: status || "active",
-      portionUnit: portionUnit || "piece",
     });
 
     res.status(201).json({ message: "Menu item created successfully.", menuItem });
@@ -42,10 +65,11 @@ exports.createMenuItem = async (req, res) => {
 
 exports.getMenuItems = async (req, res) => {
   try {
-    const { categoryId, status, search } = req.query;
+    const { categoryId, status, search, itemType } = req.query;
     const filter = { businessId: req.user.businessId };
     if (categoryId) filter.categoryId = categoryId;
     if (status) filter.status = status;
+    if (itemType) filter.itemType = itemType;
     if (search) {
       filter.itemName = { $regex: search, $options: "i" };
     }
@@ -75,7 +99,7 @@ exports.getMenuItem = async (req, res) => {
 
 exports.updateMenuItem = async (req, res) => {
   try {
-    const { itemName, categoryId, description, price, fullPrice, status, portionUnit } = req.body;
+    const { itemName, categoryId, description, price, fullPrice, status, portionUnit, itemType, sizes } = req.body;
 
     const menuItem = await MenuItem.findOne({
       _id: req.params.id,
@@ -98,10 +122,27 @@ exports.updateMenuItem = async (req, res) => {
 
     if (itemName) menuItem.itemName = itemName;
     if (description !== undefined) menuItem.description = description;
-    if (price !== undefined && price !== null) menuItem.price = Number(price);
-    if (fullPrice !== undefined && fullPrice !== null) menuItem.fullPrice = Number(fullPrice);
+    if (itemType) menuItem.itemType = itemType;
+
+    if (itemType === "beverage" || menuItem.itemType === "beverage") {
+      if (sizes) {
+        try {
+          menuItem.sizes = typeof sizes === "string" ? JSON.parse(sizes) : sizes;
+        } catch (e) {
+          return res.status(400).json({ message: "Invalid sizes format." });
+        }
+      }
+      menuItem.price = undefined;
+      menuItem.fullPrice = undefined;
+      menuItem.portionUnit = undefined;
+    } else {
+      if (price !== undefined && price !== null) menuItem.price = Number(price);
+      if (fullPrice !== undefined && fullPrice !== null) menuItem.fullPrice = Number(fullPrice);
+      if (portionUnit !== undefined) menuItem.portionUnit = portionUnit;
+      menuItem.sizes = [];
+    }
+
     if (status) menuItem.status = status;
-    if (portionUnit !== undefined) menuItem.portionUnit = portionUnit;
 
     if (req.file) {
       menuItem.image = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
