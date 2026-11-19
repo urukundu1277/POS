@@ -482,7 +482,6 @@ export default function MenuManagement() {
                           value={size.size}
                           onChange={(e) => handleSizeChange(index, "size", e.target.value)}
                           className="input text-sm"
-                          placeholder="Size"
                         />
                         <input
                           name={`sizes[${index}].price`}
@@ -493,7 +492,6 @@ export default function MenuManagement() {
                           value={size.price}
                           onChange={(e) => handleSizeChange(index, "price", e.target.value)}
                           className="input text-sm w-24"
-                          placeholder="Price"
                         />
                         <button
                           type="button"
