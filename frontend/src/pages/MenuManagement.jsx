@@ -174,12 +174,16 @@ export default function MenuManagement() {
   categories.forEach((c) => { categoryMap[c._id] = c.categoryName; });
 
   const filtered = (menuItems || []).filter(
-    (item) =>
-      item && item.itemName &&
-      item.itemName.toLowerCase().includes(search.toLowerCase()) &&
-      (!filterCategory || item.categoryId === filterCategory) &&
-      (!filterStatus || item.status === filterStatus) &&
-      (!filterItemType || item.itemType === filterItemType)
+    (item) => {
+      if (!item || !item.itemName) return false;
+      const itemCatId = item.categoryId && typeof item.categoryId === 'object' ? item.categoryId._id : item.categoryId;
+      return (
+        item.itemName.toLowerCase().includes(search.toLowerCase()) &&
+        (!filterCategory || itemCatId === filterCategory) &&
+        (!filterStatus || item.status === filterStatus) &&
+        (!filterItemType || item.itemType === filterItemType)
+      );
+    }
   );
 
   return (
@@ -311,7 +315,7 @@ export default function MenuManagement() {
                         </button>
                         <button
                           onClick={() => openEdit(item)}
-                          className="ml-2 text-xs px-2 py-1 rounded bg-[var(--theme-bg-secondary)] text-[var(--theme-primary)] hover:bg-indigo-100"
+                          className="ml-2 text-xs px-2 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100"
                         >
                           <Edit className="w-3 h-3 mr-1" /> Edit
                         </button>
@@ -412,7 +416,7 @@ export default function MenuManagement() {
                 <button
                   type="button"
                   onClick={addSize}
-                  className="text-xs px-2 py-1 rounded bg-[var(--theme-bg-secondary)] text-[var(--theme-primary)] hover:bg-indigo-100"
+                  className="text-xs px-2 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100"
                 >
                   <Plus className="w-3 h-3 mr-1" /> Add Size
                 </button>

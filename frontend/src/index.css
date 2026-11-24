@@ -28,11 +28,11 @@
   }
   .btn-primary {
     @apply btn;
-    background-color: var(--theme-primary);
-    color: var(--theme-primary-text);
+    background-color: #3b82f6;
+    color: #ffffff;
   }
   .btn-primary:hover {
-    background-color: var(--theme-accent);
+    background-color: #2563eb;
   }
   .btn-secondary {
     @apply btn bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-400;
@@ -62,8 +62,8 @@
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
   }
   .badge-active {
-    background-color: var(--theme-primary);
-    color: var(--theme-primary-text);
+    background-color: #3b82f6;
+    color: #ffffff;
   }
   .badge-inactive {
     @apply badge bg-red-100 text-red-800;
