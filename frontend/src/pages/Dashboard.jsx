@@ -258,22 +258,24 @@ export default function Dashboard() {
                               )}
                             </td>
                             <td className="px-4 py-3 text-center">
-                              {(item.sizes || []).map((s, idx) => (
-                                <label key={idx} className="flex items-center gap-1 cursor-pointer text-sm whitespace-nowrap">
-                                  <input
-                                    type="radio"
-                                    name={`size-${item._id}`}
-                                    value={s.size}
-                                    checked={selectedSize === s.size}
-                                    onChange={() => setSizeSelection({ ...sizeSelection, [item._id]: s.size })}
-                                    className="w-3 h-3 text-[var(--theme-primary)] border-gray-300 focus:ring-indigo-500"
-                                  />
-                                  {s.size}
-                                </label>
-                              ))}
-                              {(item.sizes || []).length === 0 && (
-                                <span className="text-xs text-gray-500">No sizes</span>
-                              )}
+                              <div className="flex flex-col items-center gap-1">
+                                {(item.sizes || []).map((s, idx) => (
+                                  <label key={idx} className="flex items-center gap-1 cursor-pointer text-sm whitespace-nowrap">
+                                    <input
+                                      type="radio"
+                                      name={`size-${item._id}`}
+                                      value={s.size}
+                                      checked={selectedSize === s.size}
+                                      onChange={() => setSizeSelection({ ...sizeSelection, [item._id]: s.size })}
+                                      className="w-3 h-3 text-[var(--theme-primary)] border-gray-300 focus:ring-indigo-500"
+                                    />
+                                    {s.size}
+                                  </label>
+                                ))}
+                                {(item.sizes || []).length === 0 && (
+                                  <span className="text-xs text-gray-500">No sizes</span>
+                                )}
+                              </div>
                             </td>
                             <td className="px-4 py-3 text-center text-sm text-gray-600">{formatCurrency(selectedSizePrice)}</td>
                             <td className="px-4 py-3 text-right">
