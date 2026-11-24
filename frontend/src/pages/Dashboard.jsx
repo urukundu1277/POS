@@ -216,8 +216,8 @@ export default function Dashboard() {
                       onClick={() => setSelectedCategory(cat.id)}
                       className={`px-5 py-2 rounded-xl text-sm font-semibold border transition-all duration-200 ${
                         active
-                          ? "bg-[var(--theme-primary)] border-[var(--theme-primary)] text-white shadow-md"
-                          : "bg-white border-gray-300 text-gray-700 hover:bg-[var(--theme-bg-secondary)] hover:border-[var(--theme-border)]"
+                          ? "bg-blue-100 border-blue-200 text-blue-700 shadow-sm"
+                          : "bg-white border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-200"
                       }`}
                     >
                       {cat.name}
@@ -280,7 +280,7 @@ export default function Dashboard() {
                               <button
                                 onClick={() => addToCart(item, selectedSize, selectedSizePrice, 1)}
                                 disabled={!selectedSize}
-                                className="px-3 py-2 rounded-lg bg-[var(--theme-primary)] text-white text-xs font-medium hover:bg-[var(--theme-primary)] active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-1"
+                                className="px-3 py-2 rounded-lg bg-blue-100 text-blue-700 font-medium hover:bg-blue-200 active:scale-95 transition-all duration-200 flex items-center gap-1"
                               >
                                 <span className="w-3 h-3">+</span> Add
                               </button>
