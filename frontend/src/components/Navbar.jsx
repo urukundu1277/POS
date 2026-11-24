@@ -30,7 +30,7 @@ export default function Navbar({ children }) {
               <p className="text-sm font-medium text-gray-900">{user?.name || "User"}</p>
               <p className="text-xs text-gray-500">{user?.email || ""}</p>
             </div>
-            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-medium">
+            <div className="w-8 h-8 rounded-full bg-[var(--theme-bg-secondary)] flex items-center justify-center text-[var(--theme-primary)] font-medium">
               {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
             </div>
           </div>

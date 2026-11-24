@@ -141,7 +141,7 @@ export default function SuperAdminDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Shield className="w-6 h-6 text-indigo-700" /> Super Admin Dashboard
+            <Shield className="w-6 h-6 text-[var(--theme-primary)]" /> Super Admin Dashboard
           </h1>
           <p className="text-gray-500 text-sm">Manage all business accounts</p>
         </div>
@@ -194,7 +194,7 @@ export default function SuperAdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-gray-500 uppercase font-medium">Total Users</p>
-              <p className="text-2xl font-bold text-indigo-600">{stats.totalUsers}</p>
+              <p className="text-2xl font-bold text-[var(--theme-primary)]">{stats.totalUsers}</p>
             </div>
             <Activity className="w-8 h-8 text-indigo-100" />
           </div>
@@ -205,7 +205,7 @@ export default function SuperAdminDashboard() {
       {showCreateForm && (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <Users className="w-5 h-5 text-indigo-600" /> Create New Business
+            <Users className="w-5 h-5 text-[var(--theme-primary)]" /> Create New Business
           </h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -413,7 +413,7 @@ export default function SuperAdminDashboard() {
                       </button>{" "}
                       <button
                         onClick={() => resetPassword(b._id)}
-                        className="text-xs px-2 py-1 rounded bg-indigo-50 text-indigo-600 hover:bg-indigo-100 ml-1"
+                        className="text-xs px-2 py-1 rounded bg-[var(--theme-bg-secondary)] text-[var(--theme-primary)] hover:bg-indigo-100 ml-1"
                       >
                         Reset Password
                       </button>{" "}

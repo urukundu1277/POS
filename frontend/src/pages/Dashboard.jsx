@@ -25,8 +25,7 @@ export default function Dashboard() {
   const [cart, setCart] = useState([]);
   const [printing, setPrinting] = useState(false);
   const [billPreview, setBillPreview] = useState(null);
-  const [portionSelection, setPortionSelection] = useState({});
-  const [beverageSizeSelection, setBeverageSizeSelection] = useState({});
+  const [sizeSelection, setSizeSelection] = useState({});
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const navigate = useNavigate();
 
@@ -67,14 +66,12 @@ export default function Dashboard() {
       item.itemName.toLowerCase().includes(search.toLowerCase())
   );
 
-  const addToCart = (item, portionType, price, quantity = 1) => {
-    const itemType = item.itemType || "fast_food";
-    const sizeOrPortion = itemType === "beverage" ? portionType : portionType;
+  const addToCart = (item, size, price, quantity = 1) => {
     setCart((prev) => {
-      const existing = prev.find((c) => c.itemId === item._id && c.portionType === portionType && (itemType === "beverage" ? c.size === portionType : true));
+      const existing = prev.find((c) => c.itemId === item._id && c.size === size);
       if (existing) {
         return prev.map((c) =>
-          c.itemId === item._id && c.portionType === portionType && (itemType === "beverage" ? c.size === portionType : true)
+          c.itemId === item._id && c.size === size
             ? { ...c, quantity: c.quantity + quantity }
             : c
         );
@@ -82,49 +79,48 @@ export default function Dashboard() {
       return [...prev, {
         itemId: item._id,
         itemName: item.itemName,
-        itemType: itemType,
+        itemType: item.itemType || "fast_food",
         categoryId: getCategoryId(item),
         categoryName: item.categoryId && typeof item.categoryId === "object" ? item.categoryId.categoryName : "",
         price: price,
         quantity: quantity,
-        portionType: portionType,
-        size: itemType === "beverage" ? portionType : undefined,
+        size: size,
         unitPrice: price,
         portionUnit: item.portionUnit || "",
       }];
     });
-    toast.success(`${item.itemName} (${portionType}) x${quantity} added to cart`);
+    toast.success(`${item.itemName} (${size}) x${quantity} added to cart`);
   };
 
-  const increaseQty = (itemId, portionType) => {
+  const increaseQty = (itemId, size) => {
     setCart((prev) => prev.map((c) =>
-      c.itemId === itemId && c.portionType === portionType
+      c.itemId === itemId && c.size === size
         ? { ...c, quantity: c.quantity + 1 } : c
     ));
   };
 
-  const decreaseQty = (itemId, portionType) => {
+  const decreaseQty = (itemId, size) => {
     setCart((prev) => {
       const next = prev.map((c) =>
-        c.itemId === itemId && c.portionType === portionType
+        c.itemId === itemId && c.size === size
           ? { ...c, quantity: c.quantity - 1 } : c
       );
       return next.filter((c) => c.quantity > 0);
     });
   };
 
-  const removeItem = (itemId, portionType) => {
-    setCart((prev) => prev.filter((c) => !(c.itemId === itemId && c.portionType === portionType)));
+  const removeItem = (itemId, size) => {
+    setCart((prev) => prev.filter((c) => !(c.itemId === itemId && c.size === size)));
   };
 
-  const setQuantity = (itemId, portionType, value) => {
+  const setQuantity = (itemId, size, value) => {
     const qty = parseInt(value) || 0;
     if (qty <= 0) {
-      removeItem(itemId, portionType);
+      removeItem(itemId, size);
       return;
     }
     setCart((prev) => prev.map((c) =>
-      c.itemId === itemId && c.portionType === portionType
+      c.itemId === itemId && c.size === size
         ? { ...c, quantity: qty } : c
     ));
   };
@@ -132,20 +128,40 @@ export default function Dashboard() {
   const totalItems = cart.reduce((sum, c) => sum + c.quantity, 0);
   const subtotal = cart.reduce((sum, c) => sum + c.price * c.quantity, 0);
 
-  const handleGenerateBill = async () => {
+  const handleGenerateBill = () => {
     if (cart.length === 0) {
       toast.error("Cart is empty");
       return;
     }
+    const billNumber = `BILL-${Math.floor(1000 + Math.random() * 9000)}`;
+    const previewItems = cart.map((c) => ({
+      ...c,
+      total: c.price * c.quantity,
+    }));
+    const grandTotal = cart.reduce((sum, c) => sum + c.price * c.quantity, 0);
+    const totalItems = cart.reduce((sum, c) => sum + c.quantity, 0);
+    setBillPreview({
+      billNumber,
+      items: previewItems,
+      grandTotal,
+      totalItems,
+      createdAt: new Date().toISOString(),
+      paymentMethod,
+    });
+  };
+
+  const handlePrintBill = async () => {
     setPrinting(true);
     try {
       const res = await api.post("/bills/", { items: cart, paymentMethod: paymentMethod });
-      setBillPreview(res.data.bill);
-      toast.success("Bill generated successfully");
+      toast.success("Bill saved to sales history");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Bill generation failed");
+      toast.error(err.response?.data?.message || "Failed to save bill");
     } finally {
       setPrinting(false);
+      window.print();
+      setBillPreview(null);
+      clearCart();
     }
   };
 
@@ -171,15 +187,6 @@ export default function Dashboard() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{business?.businessName || "POS Dashboard"}</h1>
           <p className="text-gray-500 text-sm">{business?.address || ""}</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={handleGenerateBill}
-            disabled={cart.length === 0 || printing}
-            className="btn-success px-5 py-2.5 text-sm font-medium flex items-center gap-2 disabled:opacity-60"
-          >
-            <CreditCard className="w-4 h-4" /> Generate Bill
-          </button>
         </div>
       </header>
 
@@ -209,8 +216,8 @@ export default function Dashboard() {
                       onClick={() => setSelectedCategory(cat.id)}
                       className={`px-5 py-2 rounded-xl text-sm font-semibold border transition-all duration-200 ${
                         active
-                          ? "bg-indigo-600 border-indigo-600 text-white shadow-md"
-                          : "bg-white border-gray-300 text-gray-700 hover:bg-indigo-50 hover:border-indigo-200"
+                          ? "bg-[var(--theme-primary)] border-[var(--theme-primary)] text-white shadow-md"
+                          : "bg-white border-gray-300 text-gray-700 hover:bg-[var(--theme-bg-secondary)] hover:border-[var(--theme-border)]"
                       }`}
                     >
                       {cat.name}
@@ -231,113 +238,49 @@ export default function Dashboard() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border border-gray-200 rounded-xl bg-white shadow-sm">
                     <thead>
-                      <tr className="bg-indigo-50 border-b border-indigo-200">
+                      <tr className="bg-[var(--theme-bg-secondary)] border-b border-[var(--theme-border)]">
                         <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Name</th>
-                        {filteredItems.some((item) => item.itemType === "beverage") ? (
-                          <>
-                            <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-32">Size</th>
-                            <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-24">Price</th>
-                          </>
-                        ) : (
-                          <>
-                            <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-24">Base Price</th>
-                            <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-32">OPTIONS</th>
-                            <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-24">Price</th>
-                          </>
-                        )}
+                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-32">Size</th>
+                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase w-24">Price</th>
                         <th className="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase text-center w-20">Add</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {filteredItems.map((item) => {
-                        const isBeverage = item.itemType === "beverage";
-                        if (isBeverage) {
-                          const selectedSize = beverageSizeSelection[item._id] || ((item.sizes || [])[0]?.size || "");
-                          const selectedSizePrice = (item.sizes || []).find((s) => s.size === selectedSize)?.price || 0;
-                          return (
-                            <tr key={item._id} className="hover:bg-indigo-50 transition-all duration-200 border-b border-gray-50 last:border-0">
-                              <td className="px-4 py-3">
-                                <div className="font-semibold text-gray-900 text-sm">{item.itemName}</div>
-                                {item.description && (
-                                  <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
-                                )}
-                              </td>
-                              <td className="px-4 py-3 text-center">
-                                {(item.sizes || []).map((s, idx) => (
-                                  <label key={idx} className="flex items-center gap-1 cursor-pointer text-sm whitespace-nowrap">
-                                    <input
-                                      type="radio"
-                                      name={`beverage-size-${item._id}`}
-                                      value={s.size}
-                                      checked={selectedSize === s.size}
-                                      onChange={() => setBeverageSizeSelection({ ...beverageSizeSelection, [item._id]: s.size })}
-                                      className="w-3 h-3 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                                    />
-                                    {s.size}
-                                  </label>
-                                ))}
-                              </td>
-                              <td className="px-4 py-3 text-center text-sm text-gray-600">{formatCurrency(selectedSizePrice)}</td>
-                              <td className="px-4 py-3 text-right">
-                                <button
-                                  onClick={() => addToCart(item, selectedSize, selectedSizePrice, 1)}
-                                  className="px-3 py-2 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-1"
-                                >
-                                  <span className="w-3 h-3">+</span> Add
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        }
-
-                        const selectedPortion = portionSelection[item._id] || "single";
-                        const selectedPrice = selectedPortion === "full" && item.fullPrice ? Number(item.fullPrice) : Number(item.price);
+                        const selectedSize = sizeSelection[item._id] || ((item.sizes || [])[0]?.size || "");
+                        const selectedSizePrice = (item.sizes || []).find((s) => s.size === selectedSize)?.price || 0;
                         return (
-                          <tr key={item._id} className="hover:bg-indigo-50 transition-all duration-200 border-b border-gray-50 last:border-0">
+                          <tr key={item._id} className="hover:bg-[var(--theme-bg-secondary)] transition-all duration-200 border-b border-gray-50 last:border-0">
                             <td className="px-4 py-3">
                               <div className="font-semibold text-gray-900 text-sm">{item.itemName}</div>
                               {item.description && (
                                 <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
                               )}
                             </td>
-                            <td className="px-4 py-3 text-center text-sm">
-                              <span className="text-gray-600">{formatCurrency(Number(item.price))}</span>
-                            </td>
                             <td className="px-4 py-3 text-center">
-                              <div className="flex items-center justify-center gap-2">
-                                <label className="flex items-center gap-1 cursor-pointer text-sm">
+                              {(item.sizes || []).map((s, idx) => (
+                                <label key={idx} className="flex items-center gap-1 cursor-pointer text-sm whitespace-nowrap">
                                   <input
                                     type="radio"
-                                    name={`portion-${item._id}`}
-                                    value="single"
-                                    checked={selectedPortion === "single"}
-                                    onChange={() => setPortionSelection({ ...portionSelection, [item._id]: "single" })}
-                                    className="w-3 h-3 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                                    name={`size-${item._id}`}
+                                    value={s.size}
+                                    checked={selectedSize === s.size}
+                                    onChange={() => setSizeSelection({ ...sizeSelection, [item._id]: s.size })}
+                                    className="w-3 h-3 text-[var(--theme-primary)] border-gray-300 focus:ring-indigo-500"
                                   />
-                                  Single
+                                  {s.size}
                                 </label>
-                                {item.fullPrice && (
-                                  <label className="flex items-center gap-1 cursor-pointer text-sm">
-                                    <input
-                                      type="radio"
-                                      name={`portion-${item._id}`}
-                                      value="full"
-                                      checked={selectedPortion === "full"}
-                                      onChange={() => setPortionSelection({ ...portionSelection, [item._id]: "full" })}
-                                      className="w-3 h-3 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                                    />
-                                    Full
-                                  </label>
-                                )}
-                              </div>
+                              ))}
+                              {(item.sizes || []).length === 0 && (
+                                <span className="text-xs text-gray-500">No sizes</span>
+                              )}
                             </td>
-                            <td className="px-4 py-3 text-center">
-                              <span className="font-bold text-indigo-600">{formatCurrency(selectedPrice)}</span>
-                            </td>
+                            <td className="px-4 py-3 text-center text-sm text-gray-600">{formatCurrency(selectedSizePrice)}</td>
                             <td className="px-4 py-3 text-right">
                               <button
-                                onClick={() => addToCart(item, selectedPortion, selectedPrice, 1)}
-                                className="px-3 py-2 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-1"
+                                onClick={() => addToCart(item, selectedSize, selectedSizePrice, 1)}
+                                disabled={!selectedSize}
+                                className="px-3 py-2 rounded-lg bg-[var(--theme-primary)] text-white text-xs font-medium hover:bg-[var(--theme-primary)] active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-1"
                               >
                                 <span className="w-3 h-3">+</span> Add
                               </button>
@@ -356,7 +299,7 @@ export default function Dashboard() {
         <div className="lg:col-span-4">
           <div className="card p-5 sticky top-24">
             <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-indigo-600" /> Billing Cart
+              <CreditCard className="w-5 h-5 text-[var(--theme-primary)]" /> Billing Cart
             </h2>
 
             <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
@@ -367,20 +310,19 @@ export default function Dashboard() {
                 </div>
               ) : (
                 cart.map((item) => {
-                  const isBeverageCart = item.itemType === "beverage";
-                   const sizeLabel = isBeverageCart ? item.size : (item.portionType === "full" ? "Full" : "Single");
+                  const sizeLabel = item.size || "Single";
                   return (
-                    <div key={`${item.itemId}-${item.size || item.portionType}`} className="flex items-center gap-3 bg-gray-50 rounded-lg p-2 border border-gray-200">
+                    <div key={`${item.itemId}-${item.size}`} className="flex items-center gap-3 bg-gray-50 rounded-lg p-2 border border-gray-200">
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-baseline">
                           <span className="text-sm font-medium text-gray-900">{item.itemName}</span>
-                           <span className="text-xs text-gray-500">{isBeverageCart ? item.size : item.portionType === "full" ? "Full" : "Single"} ×{item.quantity}</span>
+                           <span className="text-xs text-gray-500">{sizeLabel} ×{item.quantity}</span>
                         </div>
                         <span className="text-xs text-gray-500">{formatCurrency(item.price)} each</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <button
-                          onClick={() => decreaseQty(item.itemId, item.size || item.portionType)}
+                          onClick={() => decreaseQty(item.itemId, item.size)}
                           className="w-7 h-7 rounded bg-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-300"
                         >
                           <Minus className="w-3 h-3" />
@@ -389,17 +331,17 @@ export default function Dashboard() {
                           type="number"
                           min="1"
                           value={item.quantity}
-                          onChange={(e) => setQuantity(item.itemId, item.size || item.portionType, e.target.value)}
+                          onChange={(e) => setQuantity(item.itemId, item.size, e.target.value)}
                           className="w-8 text-center text-sm border border-gray-300 rounded px-1"
                         />
                         <button
-                          onClick={() => increaseQty(item.itemId, item.size || item.portionType)}
+                          onClick={() => increaseQty(item.itemId, item.size)}
                           className="w-7 h-7 rounded bg-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-300"
                         >
                           <Plus className="w-3 h-3" />
                         </button>
                         <button
-                          onClick={() => removeItem(item.itemId, item.size || item.portionType)}
+                          onClick={() => removeItem(item.itemId, item.size)}
                           className="ml-2 text-gray-400 hover:text-red-600"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -421,7 +363,7 @@ export default function Dashboard() {
                 <span className="text-gray-600">Subtotal</span>
                 <span className="font-medium text-gray-900">{formatCurrency(subtotal)}</span>
               </div>
-              <div className="flex justify-between text-base font-bold text-indigo-700 pt-2 border-t border-gray-200">
+              <div className="flex justify-between text-base font-bold text-[var(--theme-primary)] pt-2 border-t border-gray-200">
                 <span>Grand Total</span>
                 <span>{formatCurrency(subtotal)}</span>
               </div>
@@ -429,13 +371,13 @@ export default function Dashboard() {
               <div className="mt-4">
                 <label className="block text-xs font-medium text-gray-600 uppercase mb-2">Payment Method</label>
                 <div className="flex gap-2">
-                  <label className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer transition-colors ${paymentMethod === "cash" ? "bg-indigo-50 border-indigo-200 text-indigo-700 ring-1 ring-indigo-500" : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"}`} onClick={() => setPaymentMethod("cash")}>
+                  <label className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer transition-colors ${paymentMethod === "cash" ? "bg-[var(--theme-bg-secondary)] border-[var(--theme-border)] text-[var(--theme-primary)] ring-1 ring-indigo-500" : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"}`} onClick={() => setPaymentMethod("cash")}>
                     <CreditCard className="w-4 h-4" /> Cash
                   </label>
-                  <label className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer transition-colors ${paymentMethod === "upi" ? "bg-indigo-50 border-indigo-200 text-indigo-700 ring-1 ring-indigo-500" : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"}`} onClick={() => setPaymentMethod("upi")}>
+                  <label className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer transition-colors ${paymentMethod === "upi" ? "bg-[var(--theme-bg-secondary)] border-[var(--theme-border)] text-[var(--theme-primary)] ring-1 ring-indigo-500" : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"}`} onClick={() => setPaymentMethod("upi")}>
                     <Smartphone className="w-4 h-4" /> UPI
                   </label>
-                  <label className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer transition-colors ${paymentMethod === "card" ? "bg-indigo-50 border-indigo-200 text-indigo-700 ring-1 ring-indigo-500" : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"}`} onClick={() => setPaymentMethod("card")}>
+                  <label className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer transition-colors ${paymentMethod === "card" ? "bg-[var(--theme-bg-secondary)] border-[var(--theme-border)] text-[var(--theme-primary)] ring-1 ring-indigo-500" : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"}`} onClick={() => setPaymentMethod("card")}>
                     <CreditCard className="w-4 h-4" /> Card
                   </label>
                 </div>
@@ -444,18 +386,18 @@ export default function Dashboard() {
 
             <div className="mt-4 grid grid-cols-2 gap-3">
               <button
+                onClick={handleGenerateBill}
+                disabled={cart.length === 0}
+                className="btn-primary py-2 text-sm disabled:opacity-50 disabled:pointer-events-none"
+              >
+                Generate Bill
+              </button>
+              <button
                 onClick={clearCart}
                 disabled={cart.length === 0}
                 className="btn-outline py-2 text-sm disabled:opacity-50 disabled:pointer-events-none"
               >
                 Clear Cart
-              </button>
-              <button
-                onClick={handleGenerateBill}
-                disabled={cart.length === 0 || printing}
-                className="btn-primary py-2 text-sm disabled:opacity-60 disabled:pointer-events-none"
-              >
-                Generate Bill
               </button>
             </div>
           </div>
@@ -500,11 +442,11 @@ export default function Dashboard() {
               <span>₹{Number(billPreview.grandTotal).toFixed(2)}</span>
             </div>
             <div className="flex gap-3">
-              <button onClick={() => { setPrinting(true); setTimeout(() => { window.print(); setPrinting(false); }, 100); }} className="btn-primary flex-1">
+              <button onClick={handlePrintBill} className="btn-primary flex-1">
                 <Printer className="w-4 h-4 mr-2" /> Print Bill
               </button>
-              <button onClick={() => { setBillPreview(null); clearCart(); }} className="btn-secondary flex-1">
-                New Transaction
+              <button onClick={() => setBillPreview(null)} className="btn-secondary flex-1">
+                Modify Bill
               </button>
             </div>
           </div>

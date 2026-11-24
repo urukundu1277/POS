@@ -87,7 +87,7 @@ export default function BusinessProfile() {
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--theme-primary)]"></div>
         <span className="ml-2 text-sm text-gray-600">Loading profile...</span>
       </div>
     );
@@ -96,7 +96,7 @@ export default function BusinessProfile() {
   return (
     <div className="space-y-6 min-h-screen">
       <div className="flex items-center gap-4">
-        <Building className="w-6 h-6 text-indigo-600" />
+        <Building className="w-6 h-6 text-[var(--theme-primary)]" />
         <h1 className="text-xl font-bold text-gray-900">Business Profile</h1>
       </div>
 
@@ -111,7 +111,7 @@ export default function BusinessProfile() {
                   <Building className="w-10 h-10" />
                 </div>
               )}
-              <label className="absolute bottom-0 right-0 bg-indigo-600 text-white rounded-full p-2 cursor-pointer hover:bg-indigo-700">
+              <label className="absolute bottom-0 right-0 bg-[var(--theme-primary)] text-white rounded-full p-2 cursor-pointer hover:bg-[var(--theme-primary)]">
                 <input type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
               </label>

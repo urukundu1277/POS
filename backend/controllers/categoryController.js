@@ -1,8 +1,9 @@
 const Category = require("../models/Category");
+const MenuItem = require("../models/MenuItem");
 
 exports.createCategory = async (req, res) => {
   try {
-    const { categoryName, description, status } = req.body;
+    const { categoryName, description, status, itemIds } = req.body;
 
     if (!categoryName) {
       return res.status(400).json({ message: "Category name is required." });
@@ -29,6 +30,15 @@ exports.createCategory = async (req, res) => {
       status: status || "active",
     });
 
+    // Assign items to category
+    if (itemIds) {
+      const itemIdsArray = typeof itemIds === "string" ? JSON.parse(itemIds) : itemIds;
+      await MenuItem.updateMany(
+        { _id: { $in: itemIdsArray }, businessId: req.user.businessId },
+        { categoryId: category._id }
+      );
+    }
+
     res.status(201).json({ message: "Category created successfully.", category });
   } catch (error) {
     if (error.code === 11000) {
@@ -44,7 +54,18 @@ exports.getCategories = async (req, res) => {
     const filter = { businessId: req.user.businessId };
     if (status) filter.status = status;
     const categories = await Category.find(filter).sort({ createdAt: -1 });
-    res.json({ categories });
+
+    // Add item count to each category
+    const categoriesWithItems = await Promise.all(categories.map(async (cat) => {
+      const itemCount = await MenuItem.countDocuments({ categoryId: cat._id, businessId: req.user.businessId });
+      return {
+        ...cat.toObject(),
+        itemCount,
+        itemIds: cat.itemIds || [],
+      };
+    }));
+
+    res.json({ categories: categoriesWithItems });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -59,7 +80,8 @@ exports.getCategory = async (req, res) => {
     if (!category) {
       return res.status(404).json({ message: "Category not found." });
     }
-    res.json({ category });
+    const itemCount = await MenuItem.countDocuments({ categoryId: category._id, businessId: req.user.businessId });
+    res.json({ category: { ...category.toObject(), itemCount } });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -67,7 +89,7 @@ exports.getCategory = async (req, res) => {
 
 exports.updateCategory = async (req, res) => {
   try {
-    const { categoryName, description, status } = req.body;
+    const { categoryName, description, status, itemIds } = req.body;
 
     const category = await Category.findOne({
       _id: req.params.id,
@@ -87,6 +109,23 @@ exports.updateCategory = async (req, res) => {
 
     await category.save();
 
+    // Update item assignments
+    if (itemIds !== undefined) {
+      const itemIdsArray = typeof itemIds === "string" ? JSON.parse(itemIds) : itemIds;
+      // First, remove this category from all items that were previously assigned
+      await MenuItem.updateMany(
+        { categoryId: category._id, businessId: req.user.businessId },
+        { categoryId: null }
+      );
+      // Then assign new items to this category
+      if (itemIdsArray && itemIdsArray.length > 0) {
+        await MenuItem.updateMany(
+          { _id: { $in: itemIdsArray }, businessId: req.user.businessId },
+          { categoryId: category._id }
+        );
+      }
+    }
+
     res.json({ message: "Category updated successfully.", category });
   } catch (error) {
     if (error.code === 11000) {
@@ -105,6 +144,13 @@ exports.deleteCategory = async (req, res) => {
     if (!category) {
       return res.status(404).json({ message: "Category not found." });
     }
+
+    // Remove category association from items
+    await MenuItem.updateMany(
+      { categoryId: category._id, businessId: req.user.businessId },
+      { categoryId: null }
+    );
+
     res.json({ message: "Category deleted successfully." });
   } catch (error) {
     res.status(500).json({ message: error.message });

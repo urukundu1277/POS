@@ -38,7 +38,7 @@ export default function Sidebar({ isOpen, onToggle }) {
       } lg:relative lg:translate-x-0 lg:w-64`}
     >
       <div className="flex items-center justify-between h-14 px-4 border-b border-gray-200">
-        <span className="font-bold text-indigo-600 text-lg tracking-tight">POS</span>
+        <span className="font-bold text-[var(--theme-primary)] text-lg tracking-tight">POS</span>
         <button
           onClick={onToggle}
           className="lg:hidden p-1 text-gray-500 hover:text-gray-900"
@@ -58,7 +58,7 @@ export default function Sidebar({ isOpen, onToggle }) {
               to={item.path}
               className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-indigo-50 text-indigo-700"
+                  ? "bg-[var(--theme-bg-secondary)] text-[var(--theme-primary)]"
                   : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
               }`}
             >

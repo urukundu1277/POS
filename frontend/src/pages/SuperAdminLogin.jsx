@@ -30,7 +30,7 @@ export default function SuperAdminLogin() {
       <div className="w-full max-w-md">
         <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
           <div className="text-center mb-8">
-            <div className="w-12 h-12 bg-indigo-700 rounded-lg flex items-center justify-center mx-auto mb-3">
+            <div className="w-12 h-12 bg-[var(--theme-primary)] rounded-lg flex items-center justify-center mx-auto mb-3">
               <LockKeyhole className="w-6 h-6 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900">Super Admin Login</h2>

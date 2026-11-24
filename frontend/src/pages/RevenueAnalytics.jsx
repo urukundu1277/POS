@@ -184,7 +184,7 @@ export default function RevenueAnalytics() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--theme-primary)]"></div>
       </div>
     );
   }
@@ -295,7 +295,7 @@ export default function RevenueAnalytics() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-indigo-600" /> Revenue Analytics
+            <BarChart3 className="w-6 h-6 text-[var(--theme-primary)]" /> Revenue Analytics
           </h1>
           <p className="text-gray-500 text-sm">Track sales, revenue, and performance</p>
         </div>
@@ -402,12 +402,12 @@ export default function RevenueAnalytics() {
       {/* Daily Revenue Section */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Clock className="w-5 h-5 text-indigo-600" /> Daily Revenue
+          <Clock className="w-5 h-5 text-[var(--theme-primary)]" /> Daily Revenue
         </h3>
         <div className="flex flex-col md:flex-row gap-6 items-start">
           <div className="flex-1 min-w-0">
             <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="bg-indigo-50 p-4 rounded-lg">
+              <div className="bg-[var(--theme-bg-secondary)] p-4 rounded-lg">
                 <p className="text-xs text-gray-500 uppercase font-medium">Total Revenue</p>
                 <p className="text-lg font-bold text-gray-900">{formatCurrency(dailyData.totalRevenue)}</p>
               </div>
@@ -472,12 +472,12 @@ export default function RevenueAnalytics() {
       {/* Monthly Revenue Section */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-indigo-600" /> Monthly Revenue
+          <Calendar className="w-5 h-5 text-[var(--theme-primary)]" /> Monthly Revenue
         </h3>
         <div className="flex flex-col md:flex-row gap-6 items-start">
           <div className="flex-1 min-w-0">
             <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="bg-indigo-50 p-4 rounded-lg">
+              <div className="bg-[var(--theme-bg-secondary)] p-4 rounded-lg">
                 <p className="text-xs text-gray-500 uppercase font-medium">Month Revenue</p>
                 <p className="text-lg font-bold text-gray-900">{formatCurrency(monthlyData.currentMonthRevenue)}</p>
               </div>
@@ -542,7 +542,7 @@ export default function RevenueAnalytics() {
       {/* Category Revenue Section */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <PieChart className="w-5 h-5 text-indigo-600" /> Category Revenue
+          <PieChart className="w-5 h-5 text-[var(--theme-primary)]" /> Category Revenue
         </h3>
         <div className="flex flex-col md:flex-row gap-6 items-start">
           <div className="flex-1 min-w-0">
@@ -591,7 +591,7 @@ export default function RevenueAnalytics() {
       {/* Item Revenue Section */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <LayoutList className="w-5 h-5 text-indigo-600" /> Item Performance
+          <LayoutList className="w-5 h-5 text-[var(--theme-primary)]" /> Item Performance
         </h3>
         <div className="flex flex-col md:flex-row gap-6 items-start">
           <div className="flex-1 min-w-0 overflow-x-auto">
@@ -667,7 +667,7 @@ export default function RevenueAnalytics() {
       {/* Payment Analytics Section */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <CreditCard className="w-5 h-5 text-indigo-600" /> Payment Methods
+          <CreditCard className="w-5 h-5 text-[var(--theme-primary)]" /> Payment Methods
         </h3>
         <div className="flex flex-col md:flex-row gap-6 items-start">
           <div className="flex-1 min-w-0">

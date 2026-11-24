@@ -12,8 +12,9 @@ import {
 
 export default function Categories() {
   const [categories, setCategories] = useState([]);
+  const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ categoryName: "", description: "", status: "active", image: "" });
+  const [form, setForm] = useState({ categoryName: "", description: "", status: "active", image: "", itemIds: [] });
   const [editing, setEditing] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -21,6 +22,7 @@ export default function Categories() {
 
   useEffect(() => {
     loadCategories();
+    loadMenuItems();
   }, []);
 
   const loadCategories = async () => {
@@ -29,13 +31,31 @@ export default function Categories() {
       setCategories(res.data.categories);
     } catch (err) {
       toast.error("Failed to load categories");
-    } finally {
-      setLoading(false);
+    }
+  };
+
+  const loadMenuItems = async () => {
+    try {
+      const res = await api.get("/menu-items/");
+      setMenuItems(res.data.menuItems);
+    } catch (err) {
+      toast.error("Failed to load menu items");
     }
   };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleItemChange = (e) => {
+    const value = e.target.value;
+    if (value === "all") {
+      setForm({ ...form, itemIds: menuItems.map((item) => item._id) });
+    } else if (e.target.checked) {
+      setForm({ ...form, itemIds: [...form.itemIds, value] });
+    } else {
+      setForm({ ...form, itemIds: form.itemIds.filter((id) => id !== value) });
+    }
   };
 
   const handleImageChange = (e) => {
@@ -49,14 +69,14 @@ export default function Categories() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ categoryName: "", description: "", status: "active", image: "" });
+    setForm({ categoryName: "", description: "", status: "active", image: "", itemIds: [] });
     setImagePreview("");
     setModalOpen(true);
   };
 
   const openEdit = (cat) => {
     setEditing(cat._id);
-    setForm({ categoryName: cat.categoryName, description: cat.description, status: cat.status, image: cat.image });
+    setForm({ categoryName: cat.categoryName, description: cat.description, status: cat.status, image: cat.image, itemIds: cat.itemIds || [] });
     setImagePreview(cat.image || "");
     setModalOpen(true);
   };
@@ -73,19 +93,24 @@ export default function Categories() {
         const blob = await (await fetch(imagePreview)).blob();
         formData.append("image", blob, "image.png");
       }
+      formData.append("itemIds", JSON.stringify(form.itemIds));
       if (editing) {
         await api.put(`/categories/${editing}`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         toast.success("Category updated");
       } else {
-        await api.post("/categories/", formData, {
+        const res = await api.post("/categories/", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         toast.success("Category created");
+        // Immediately add new category to state without waiting for reload
+        if (res.data.category) {
+          setCategories(prev => [res.data.category, ...prev]);
+        }
       }
       closeModal();
-      loadCategories();
+      loadCategories(); // Refresh to get latest data
     } catch (err) {
       toast.error(err.response?.data?.message || "Operation failed");
     } finally {
@@ -95,8 +120,11 @@ export default function Categories() {
 
   const toggleStatus = async (cat) => {
     try {
-      await api.put(`/categories/${cat._id}`, { status: cat.status === "active" ? "inactive" : "active" });
+      const newStatus = cat.status === "active" ? "inactive" : "active";
+      await api.put(`/categories/${cat._id}`, { status: newStatus });
       toast.success(`Category ${cat.status === "active" ? "disabled" : "enabled"}`);
+      // Update immediately without waiting for reload
+      setCategories(prev => prev.map(c => c._id === cat._id ? { ...c, status: newStatus } : c));
       loadCategories();
     } catch (err) {
       toast.error("Failed to update status");
@@ -108,6 +136,8 @@ export default function Categories() {
     try {
       await api.delete(`/categories/${id}`);
       toast.success("Category deleted");
+      // Remove immediately from list
+      setCategories(prev => prev.filter(c => c._id !== id));
       loadCategories();
     } catch (err) {
       toast.error(err.response?.data?.message || "Delete failed");
@@ -124,7 +154,7 @@ export default function Categories() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Plus className="w-6 h-6 text-indigo-600" />
+          <Plus className="w-6 h-6 text-[var(--theme-primary)]" />
           <h1 className="text-xl font-bold text-gray-900">Category Management</h1>
         </div>
         <button
@@ -142,15 +172,16 @@ export default function Categories() {
               <tr className="bg-gray-50 text-xs text-gray-600 uppercase border-b">
                 <th className="px-4 py-3">Category Name</th>
                 <th className="px-4 py-3">Description</th>
+                <th className="px-4 py-3">Items</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {loading ? (
-                <tr><td colSpan="4" className="p-4 text-center">Loading...</td></tr>
+                <tr><td colSpan="5" className="p-4 text-center">Loading...</td></tr>
               ) : categories.length === 0 ? (
-                <tr><td colSpan="4" className="p-8 text-center text-gray-500">No categories found.</td></tr>
+                <tr><td colSpan="5" className="p-8 text-center text-gray-500">No categories found.</td></tr>
               ) : (
                 categories.map((cat) => (
                   <tr key={cat._id} className="hover:bg-gray-50">
@@ -161,6 +192,7 @@ export default function Categories() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">{cat.description || "—"}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{cat.itemCount || 0} items</td>
                     <td className="px-4 py-3">
                       <span className={`badge ${cat.status === "active" ? "badge-active" : "badge-inactive"}`}>
                         {cat.status}
@@ -175,7 +207,7 @@ export default function Categories() {
                       </button>
                       <button
                         onClick={() => openEdit(cat)}
-                        className="ml-2 text-xs px-2 py-1 rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                        className="ml-2 text-xs px-2 py-1 rounded bg-[var(--theme-bg-secondary)] text-[var(--theme-primary)] hover:bg-indigo-100"
                       >
                         <Edit className="w-3 h-3 mr-1" /> Edit
                       </button>
@@ -199,7 +231,7 @@ export default function Categories() {
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
         onClick={closeModal}
       >
-        <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
           <h3 className="text-lg font-bold text-gray-900 mb-4">{editing ? "Edit Category" : "Add Category"}</h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -222,6 +254,36 @@ export default function Categories() {
                 value={form.description}
                 onChange={handleChange}
               />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Assign Menu Items</label>
+              <div className="max-h-48 overflow-y-auto p-2 border border-gray-200 rounded bg-gray-50">
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="checkbox"
+                    id="select-all"
+                    checked={form.itemIds.length === menuItems.length && menuItems.length > 0}
+                    onChange={handleItemChange}
+                    name="all"
+                    value="all"
+                  />
+                  <label className="text-xs font-medium" htmlFor="select-all">Select All</label>
+                </div>
+                {menuItems.map((item) => (
+                  <div key={item._id} className="flex items-center gap-2 text-xs">
+                    <input
+                      type="checkbox"
+                      id={`item-${item._id}`}
+                      checked={form.itemIds.includes(item._id)}
+                      onChange={handleItemChange}
+                      value={item._id}
+                    />
+                    <label className="text-sm" htmlFor={`item-${item._id}`}>
+                      {item.itemName} ({item.itemType === "beverage" ? "Beverage" : "Fast Food"})
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Category Image (optional)</label>
@@ -253,7 +315,7 @@ export default function Categories() {
           </form>
         </div>
       </div>
-      )}
+    )}
     </div>
   );
 }

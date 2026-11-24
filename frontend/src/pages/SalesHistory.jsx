@@ -87,17 +87,17 @@ export default function SalesHistory() {
       <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-          <Clock className="w-6 h-6 text-indigo-600" /> Sales History
+          <Clock className="w-6 h-6 text-[var(--theme-primary)]" /> Sales History
         </h1>
       </div>
 
       <div className="card p-4">
         <div className="flex flex-col md:flex-row gap-4 items-end mb-4">
           <div className="flex gap-2">
-            <button onClick={() => applyQuickFilter("today")} className={`px-3 py-1.5 rounded text-sm transition ${filter === "today" ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>Today</button>
-            <button onClick={() => applyQuickFilter("yesterday")} className={`px-3 py-1.5 rounded text-sm transition ${filter === "yesterday" ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>Yesterday</button>
-            <button onClick={() => applyQuickFilter("week")} className={`px-3 py-1.5 rounded text-sm transition ${filter === "week" ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>This Week</button>
-            <button onClick={() => applyQuickFilter("month")} className={`px-3 py-1.5 rounded text-sm transition ${filter === "month" ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>This Month</button>
+            <button onClick={() => applyQuickFilter("today")} className={`px-3 py-1.5 rounded text-sm transition ${filter === "today" ? "bg-[var(--theme-primary)] text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>Today</button>
+            <button onClick={() => applyQuickFilter("yesterday")} className={`px-3 py-1.5 rounded text-sm transition ${filter === "yesterday" ? "bg-[var(--theme-primary)] text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>Yesterday</button>
+            <button onClick={() => applyQuickFilter("week")} className={`px-3 py-1.5 rounded text-sm transition ${filter === "week" ? "bg-[var(--theme-primary)] text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>This Week</button>
+            <button onClick={() => applyQuickFilter("month")} className={`px-3 py-1.5 rounded text-sm transition ${filter === "month" ? "bg-[var(--theme-primary)] text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>This Month</button>
           </div>
           <div className="flex gap-2 w-full md:w-auto">
             <input type="date" className="input" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
@@ -149,7 +149,7 @@ export default function SalesHistory() {
                     <td className="px-4 py-3 text-right">
                       <button
                         onClick={() => previewBill(bill)}
-                        className="text-xs px-2 py-1 rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100 flex items-center gap-1"
+                        className="text-xs px-2 py-1 rounded bg-[var(--theme-bg-secondary)] text-[var(--theme-primary)] hover:bg-indigo-100 flex items-center gap-1"
                       >
                         <Eye className="w-3 h-3" /> Preview
                       </button>

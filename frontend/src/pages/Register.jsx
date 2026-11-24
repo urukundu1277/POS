@@ -44,7 +44,7 @@ export default function Register() {
       <div className="w-full max-w-md">
         <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
           <div className="text-center mb-8">
-            <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center mx-auto mb-3">
+            <div className="w-12 h-12 bg-[var(--theme-primary)] rounded-lg flex items-center justify-center mx-auto mb-3">
               <Building className="w-6 h-6 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900">Create account</h2>
@@ -166,7 +166,7 @@ export default function Register() {
 
           <p className="mt-6 text-center text-sm text-gray-500">
             Already have an account?{" "}
-            <a href="/login" className="text-indigo-600 hover:text-indigo-500 font-medium">
+            <a href="/login" className="text-[var(--theme-primary)] hover:text-indigo-500 font-medium">
               Sign in
             </a>
           </p>

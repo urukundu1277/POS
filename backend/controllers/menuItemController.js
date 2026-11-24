@@ -10,21 +10,21 @@ exports.createMenuItem = async (req, res) => {
     }
 
     let parsedSizes = [];
-    if (itemType === "beverage") {
+    if (sizes) {
       try {
-        parsedSizes = typeof sizes === "string" ? JSON.parse(sizes) : (sizes || []);
+        parsedSizes = typeof sizes === "string" ? JSON.parse(sizes) : sizes;
       } catch (e) {
         return res.status(400).json({ message: "Invalid sizes format." });
       }
       if (!parsedSizes || parsedSizes.length === 0) {
-        return res.status(400).json({ message: "At least one size with price is required for beverages." });
+        return res.status(400).json({ message: "At least one size with price is required." });
       }
       for (const s of parsedSizes) {
         if (!s.size || s.price === undefined || s.price === null || s.price < 0) {
-          return res.status(400).json({ message: "Each beverage size must have a name and valid price." });
+          return res.status(400).json({ message: "Each size must have a name and valid price." });
         }
       }
-    } else {
+    } else if (itemType !== "beverage") {
       if (price === undefined || price === null || price < 0) {
         return res.status(400).json({ message: "Item price is required." });
       }
@@ -49,10 +49,10 @@ exports.createMenuItem = async (req, res) => {
       itemName,
       description: description || "",
       itemType: itemType || "fast_food",
-      price: itemType === "beverage" ? undefined : Number(price),
-      fullPrice: itemType === "fast_food" ? (Number(fullPrice) || 0) : undefined,
-      portionUnit: itemType === "fast_food" ? (portionUnit || "piece") : undefined,
-      sizes: itemType === "beverage" ? parsedSizes : [],
+      price: itemType === "fast_food" && !parsedSizes.length ? Number(price) : undefined,
+      fullPrice: itemType === "fast_food" && !parsedSizes.length ? (Number(fullPrice) || 0) : undefined,
+      portionUnit: itemType === "fast_food" && !parsedSizes.length ? (portionUnit || "piece") : undefined,
+      sizes: parsedSizes.length ? parsedSizes : [],
       image,
       status: status || "active",
     });
@@ -124,23 +124,32 @@ exports.updateMenuItem = async (req, res) => {
     if (description !== undefined) menuItem.description = description;
     if (itemType) menuItem.itemType = itemType;
 
-    if (itemType === "beverage" || menuItem.itemType === "beverage") {
-      if (sizes) {
-        try {
-          menuItem.sizes = typeof sizes === "string" ? JSON.parse(sizes) : sizes;
-        } catch (e) {
-          return res.status(400).json({ message: "Invalid sizes format." });
+    let parsedSizes = menuItem.sizes;
+    if (sizes) {
+      try {
+        parsedSizes = typeof sizes === "string" ? JSON.parse(sizes) : sizes;
+      } catch (e) {
+        return res.status(400).json({ message: "Invalid sizes format." });
+      }
+      if (!parsedSizes || parsedSizes.length === 0) {
+        return res.status(400).json({ message: "At least one size with price is required." });
+      }
+      for (const s of parsedSizes) {
+        if (!s.size || s.price === undefined || s.price === null || s.price < 0) {
+          return res.status(400).json({ message: "Each size must have a name and valid price." });
         }
       }
-      menuItem.price = undefined;
-      menuItem.fullPrice = undefined;
-      menuItem.portionUnit = undefined;
-    } else {
+    } else if (menuItem.itemType !== "beverage") {
       if (price !== undefined && price !== null) menuItem.price = Number(price);
       if (fullPrice !== undefined && fullPrice !== null) menuItem.fullPrice = Number(fullPrice);
       if (portionUnit !== undefined) menuItem.portionUnit = portionUnit;
-      menuItem.sizes = [];
+      parsedSizes = [];
     }
+
+    menuItem.price = parsedSizes.length ? undefined : menuItem.price;
+    menuItem.fullPrice = parsedSizes.length ? undefined : menuItem.fullPrice;
+    menuItem.portionUnit = parsedSizes.length ? undefined : menuItem.portionUnit;
+    menuItem.sizes = parsedSizes;
 
     if (status) menuItem.status = status;
 

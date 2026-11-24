@@ -3,8 +3,22 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --theme-bg: #FFFFFF;
+    --theme-bg-secondary: #F7F7F7;
+    --theme-text: #1F2937;
+    --theme-text-secondary: #6B7280;
+    --theme-border: #E5E7EB;
+    --theme-primary: #1F2937;
+    --theme-primary-text: #FFFFFF;
+    --theme-accent: #1F2937;
+    --theme-surface: #FFFFFF;
+    --theme-inverted: #1F2937;
+  }
+
   body {
-    @apply bg-gray-50 text-gray-900;
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
   }
 }
 
@@ -13,7 +27,12 @@
     @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
   }
   .btn-primary {
-    @apply btn bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500;
+    @apply btn;
+    background-color: var(--theme-primary);
+    color: var(--theme-primary-text);
+  }
+  .btn-primary:hover {
+    background-color: var(--theme-accent);
   }
   .btn-secondary {
     @apply btn bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-400;
@@ -31,10 +50,10 @@
     @apply btn border border-gray-300 bg-white hover:bg-gray-50 focus:ring-gray-400;
   }
   .input {
-    @apply block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500;
+    @apply block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-[var(--theme-primary)];
   }
   .select {
-    @apply block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500;
+    @apply block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-[var(--theme-primary)];
   }
   .card {
     @apply bg-white rounded-xl border border-gray-200 shadow-sm;
@@ -43,7 +62,8 @@
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
   }
   .badge-active {
-    @apply badge bg-green-100 text-green-800;
+    background-color: var(--theme-primary);
+    color: var(--theme-primary-text);
   }
   .badge-inactive {
     @apply badge bg-red-100 text-red-800;

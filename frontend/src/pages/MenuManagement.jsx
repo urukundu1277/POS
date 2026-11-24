@@ -10,12 +10,9 @@ import {
   X,
   Search,
   SlidersHorizontal,
-  Droplet,
   Minus,
 } from "lucide-react";
 import { formatCurrency } from "../utils/format";
-
-const DEFAULT_SIZES = ["250 ml", "300 ml", "500 ml", "600 ml", "750 ml", "1 L", "1.5 L", "2 L"];
 
 export default function MenuManagement() {
   const [menuItems, setMenuItems] = useState([]);
@@ -26,9 +23,6 @@ export default function MenuManagement() {
     categoryId: "",
     description: "",
     itemType: "fast_food",
-    price: "",
-    fullPrice: "",
-    portionUnit: "piece",
     sizes: [],
     status: "active",
     image: "",
@@ -38,6 +32,7 @@ export default function MenuManagement() {
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
   const [filterItemType, setFilterItemType] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -80,11 +75,6 @@ export default function MenuManagement() {
 
   const handleItemTypeChange = (value) => {
     setForm({ ...form, itemType: value });
-    if (value === "beverage") {
-      setForm({ ...form, sizes: DEFAULT_SIZES.map((s) => ({ size: s, price: "" })) });
-    } else {
-      setForm({ ...form, sizes: [] });
-    }
   };
 
   const handleImageChange = (e) => {
@@ -96,16 +86,9 @@ export default function MenuManagement() {
     }
   };
 
-  const openAdd = () => {
+  const openAddItem = () => {
     setEditing(null);
-    setForm({ itemName: "", categoryId: "", description: "", itemType: "fast_food", price: "", fullPrice: "", portionUnit: "piece", sizes: [], status: "active", image: "" });
-    setImagePreview("");
-    setModalOpen(true);
-  };
-
-  const openAddBeverage = () => {
-    setEditing(null);
-    setForm({ itemName: "", categoryId: "", description: "", itemType: "beverage", price: "", fullPrice: "", portionUnit: "", sizes: DEFAULT_SIZES.map((s) => ({ size: s, price: "" })), status: "active", image: "" });
+    setForm({ itemName: "", categoryId: "", description: "", itemType: "fast_food", sizes: [], status: "active", image: "" });
     setImagePreview("");
     setModalOpen(true);
   };
@@ -117,9 +100,6 @@ export default function MenuManagement() {
       categoryId: item.categoryId,
       description: item.description,
       itemType: item.itemType || "fast_food",
-      price: item.price || "",
-      fullPrice: item.fullPrice || "",
-      portionUnit: item.portionUnit || "",
       sizes: item.sizes || [],
       status: item.status,
       image: item.image,
@@ -136,16 +116,10 @@ export default function MenuManagement() {
       formData.append("itemName", form.itemName);
       formData.append("categoryId", form.categoryId);
       formData.append("description", form.description);
-      formData.append("itemType", form.itemType);
-      formData.append("status", form.status);
-      if (form.itemType === "fast_food") {
-        formData.append("price", form.price);
-        formData.append("fullPrice", form.fullPrice);
-        formData.append("portionUnit", form.portionUnit);
-      } else {
-        formData.append("sizes", JSON.stringify(form.sizes));
-      }
-      if (imagePreview && imagePreview.startsWith("data:")) {
+    formData.append("itemType", form.itemType);
+    formData.append("status", form.status);
+    formData.append("sizes", JSON.stringify(form.sizes));
+    if (imagePreview && imagePreview.startsWith("data:")) {
         const blob = await (await fetch(imagePreview)).blob();
         formData.append("image", blob, "image.png");
       }
@@ -204,6 +178,7 @@ export default function MenuManagement() {
       item && item.itemName &&
       item.itemName.toLowerCase().includes(search.toLowerCase()) &&
       (!filterCategory || item.categoryId === filterCategory) &&
+      (!filterStatus || item.status === filterStatus) &&
       (!filterItemType || item.itemType === filterItemType)
   );
 
@@ -211,21 +186,15 @@ export default function MenuManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Plus className="w-6 h-6 text-indigo-600" />
+          <Plus className="w-6 h-6 text-[var(--theme-primary)]" />
           <h1 className="text-xl font-bold text-gray-900">Menu Management</h1>
         </div>
         <div className="flex gap-2">
           <button
-            onClick={openAdd}
+            onClick={openAddItem}
             className="btn-primary flex items-center gap-2 px-4 py-2 text-sm"
           >
-            <Plus className="w-4 h-4" /> Add Fast Food
-          </button>
-          <button
-            onClick={openAddBeverage}
-            className="btn-primary flex items-center gap-2 px-4 py-2 text-sm"
-          >
-            <Droplet className="w-4 h-4" /> Add Beverage
+            <Plus className="w-4 h-4" /> Add Item
           </button>
         </div>
       </div>
@@ -247,18 +216,27 @@ export default function MenuManagement() {
             onChange={(e) => setFilterCategory(e.target.value)}
           >
             <option value="">All Categories</option>
-            {(categories || []).map((c) => (
+            {categories.map((c) => (
               <option key={c._id || c.id} value={c._id || c.id}>{c.categoryName || c.name || "Category"}</option>
             ))}
           </select>
           <select
             className="select"
-            value={form.status}
-            onChange={(e) => {}}
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
           >
             <option value="">All Status</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
+          </select>
+          <select
+            className="select"
+            value={filterItemType}
+            onChange={(e) => setFilterItemType(e.target.value)}
+          >
+            <option value="">All Types</option>
+            <option value="fast_food">Fast Food</option>
+            <option value="beverage">Beverage</option>
           </select>
           <div className="flex items-center gap-2 text-xs text-gray-500">
             <span className="w-3 h-3 rounded-full bg-green-500 inline-block" /> Active
@@ -272,7 +250,6 @@ export default function MenuManagement() {
             <thead>
               <tr className="bg-gray-50 text-xs text-gray-600 uppercase border-b">
                 <th className="px-4 py-3">Item</th>
-                <th className="px-4 py-3">Type</th>
                 <th className="px-4 py-3">Category</th>
                 <th className="px-4 py-3">Prices</th>
                 <th className="px-4 py-3">Status</th>
@@ -281,16 +258,13 @@ export default function MenuManagement() {
             </thead>
             <tbody className="divide-y">
               {loading ? (
-                <tr><td colSpan="5" className="p-4 text-center">Loading...</td></tr>
-              ) : (!categories || categories.length === 0) ? (
-                <tr><td colSpan="5" className="p-8 text-center text-gray-500">Loading categories...</td></tr>
+                <tr><td colSpan="4" className="p-4 text-center">Loading...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan="5" className="p-8 text-center text-gray-500">No items found.</td></tr>
+                <tr><td colSpan="4" className="p-8 text-center text-gray-500">No items found.</td></tr>
               ) : (
                 filtered.map((item) => {
                   if (!item) return null;
-                  const catName = (item.categoryId && typeof item.categoryId === 'object' && item.categoryId.categoryName) || (categoryMap[item.categoryId]) || "—";
-                  const isBeverage = item.itemType === "beverage";
+                  const catName = (item.categoryId && typeof item.categoryId === 'object' && item.categoryId.categoryName) || (categoryMap[item.categoryId]) || "Uncategorized";
                   return (
                     <tr key={item._id || item.itemName} className="hover:bg-gray-50">
                       <td className="px-4 py-3">
@@ -306,14 +280,9 @@ export default function MenuManagement() {
                         </div>
                         <p className="text-xs text-gray-500">{item.description || ""}</p>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        <span className={`badge ${item.itemType === "beverage" ? "badge-active" : "badge-inactive"}`}>
-                          {item.itemType === "beverage" ? "Beverage" : "Fast Food"}
-                        </span>
-                      </td>
                       <td className="px-4 py-3 text-sm text-gray-600">{catName}</td>
                       <td className="px-4 py-3">
-                        {isBeverage ? (
+                        {(item.sizes || []).length > 0 ? (
                           <div className="space-y-1">
                             {(item.sizes || []).map((s, idx) => (
                               <div key={idx} className="text-xs">
@@ -342,7 +311,7 @@ export default function MenuManagement() {
                         </button>
                         <button
                           onClick={() => openEdit(item)}
-                          className="ml-2 text-xs px-2 py-1 rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                          className="ml-2 text-xs px-2 py-1 rounded bg-[var(--theme-bg-secondary)] text-[var(--theme-primary)] hover:bg-indigo-100"
                         >
                           <Edit className="w-3 h-3 mr-1" /> Edit
                         </button>
@@ -408,111 +377,47 @@ export default function MenuManagement() {
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Item Type</label>
-              <select
-                name="itemType"
-                className="select"
-                value={form.itemType}
-                onChange={(e) => handleItemTypeChange(e.target.value)}
-              >
-                <option value="fast_food">Fast Food</option>
-                <option value="beverage">Beverage</option>
-              </select>
-            </div>
-            {form.itemType === "fast_food" ? (
-              <>
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Price (₹)</label>
-                  <input
-                    name="price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    className="input"
-                    placeholder="0.00"
-                    value={form.price}
-                    onChange={handleChange}
-                    required
-                  />
-                  <p className="text-xs text-gray-500">Price per single portion</p>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Full Price (₹)</label>
-                  <input
-                    name="fullPrice"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    className="input"
-                    placeholder="0.00"
-                    value={form.fullPrice}
-                    onChange={handleChange}
-                  />
-                  <p className="text-xs text-gray-500">Optional full portion price</p>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Unit</label>
-                  <select
-                    name="portionUnit"
-                    className="select"
-                    value={form.portionUnit}
-                    onChange={handleChange}
-                  >
-                    <option value="piece">Piece</option>
-                    <option value="kg">Kg</option>
-                    <option value="liter">Liter</option>
-                    <option value="gram">Gram</option>
-                    <option value="ml">Ml</option>
-                    <option value="dozen">Dozen</option>
-                  </select>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Beverage Sizes & Prices</label>
-                  <p className="text-xs text-gray-500">Configure each available size with its price.</p>
-                  <div className="space-y-2">
-                    {form.sizes.map((size, index) => (
-                      <div key={index} className="flex gap-2">
-                        <input
-                          name={`sizes[${index}].size`}
-                          type="text"
-                          placeholder="e.g. 250 ml"
-                          value={size.size}
-                          onChange={(e) => handleSizeChange(index, "size", e.target.value)}
-                          className="input text-sm"
-                        />
-                        <input
-                          name={`sizes[${index}].price`}
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="0.00"
-                          value={size.price}
-                          onChange={(e) => handleSizeChange(index, "price", e.target.value)}
-                          className="input text-sm w-24"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeSize(index)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
+              <label className="block text-sm font-medium text-gray-700">Add Sizes & Prices</label>
+              <p className="text-xs text-gray-500">Configure each available size with its price.</p>
+              <div className="space-y-2">
+                {form.sizes.map((size, index) => (
+                  <div key={index} className="flex gap-2">
+                    <input
+                      name={`sizes[${index}].size`}
+                      type="text"
+                      placeholder="e.g. 250 ml"
+                      value={size.size}
+                      onChange={(e) => handleSizeChange(index, "size", e.target.value)}
+                      className="input text-sm"
+                    />
+                    <input
+                      name={`sizes[${index}].price`}
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={size.price}
+                      onChange={(e) => handleSizeChange(index, "price", e.target.value)}
+                      className="input text-sm w-24"
+                    />
                     <button
                       type="button"
-                      onClick={addSize}
-                      className="text-xs px-2 py-1 rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                      onClick={() => removeSize(index)}
+                      className="text-red-500 hover:text-red-700"
                     >
-                      <Plus className="w-3 h-3 mr-1" /> Add Size
+                      <Trash2 className="w-3 h-3" />
                     </button>
                   </div>
-                </div>
-              </>
-            )}
+                ))}
+                <button
+                  type="button"
+                  onClick={addSize}
+                  className="text-xs px-2 py-1 rounded bg-[var(--theme-bg-secondary)] text-[var(--theme-primary)] hover:bg-indigo-100"
+                >
+                  <Plus className="w-3 h-3 mr-1" /> Add Size
+                </button>
+              </div>
+            </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Item Image (optional)</label>
               <input type="file" accept="image/*" onChange={handleImageChange} className="block w-full text-sm text-gray-600" />
