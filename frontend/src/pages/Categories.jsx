@@ -31,6 +31,8 @@ export default function Categories() {
       setCategories(res.data.categories);
     } catch (err) {
       toast.error("Failed to load categories");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -40,6 +42,8 @@ export default function Categories() {
       setMenuItems(res.data.menuItems);
     } catch (err) {
       toast.error("Failed to load menu items");
+    } finally {
+      setLoading(false);
     }
   };
 
