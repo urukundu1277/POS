@@ -43,6 +43,9 @@ export default function Dashboard() {
       ]);
       setBusiness(bRes.data.business);
       setCategories(cRes.data.categories);
+      if (cRes.data.categories && cRes.data.categories.length > 0) {
+        setSelectedCategory(cRes.data.categories[0]._id);
+      }
       setMenuItems(mRes.data.menuItems);
     } catch (err) {
       toast.error("Failed to load data");
