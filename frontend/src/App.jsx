@@ -13,6 +13,7 @@ import BillPrint from "./pages/BillPrint";
 import SuperAdminLogin from "./pages/SuperAdminLogin";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import RevenueAnalytics from "./pages/RevenueAnalytics";
+import Expenses from "./pages/Expenses";
 import { AuthProvider } from "./context/AuthContext";
 
 function AppRoutes() {
@@ -75,6 +76,16 @@ function AppRoutes() {
             <ProtectedRoute>
               <Navbar>
                 <RevenueAnalytics />
+              </Navbar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/expenses"
+          element={
+            <ProtectedRoute>
+              <Navbar>
+                <Expenses />
               </Navbar>
             </ProtectedRoute>
           }

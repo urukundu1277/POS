@@ -10,6 +10,7 @@ import {
   Menu,
   ChevronRight,
   BarChart3,
+  CreditCard,
 } from "lucide-react";
 
 const navItems = [
@@ -18,6 +19,7 @@ const navItems = [
   { path: "/menu", label: "Menu Management", icon: ShoppingCart },
   { path: "/sales", label: "Sales History", icon: FileText },
   { path: "/revenue", label: "Revenue Analytics", icon: BarChart3 },
+  { path: "/expenses", label: "Daily Expenses", icon: CreditCard },
   { path: "/profile", label: "Business Profile", icon: Building },
 ];
 

@@ -24,6 +24,7 @@ app.use("/api/business", require("./routes/businessRoutes"));
 app.use("/api/categories", require("./routes/categoryRoutes"));
 app.use("/api/menu-items", require("./routes/menuItemRoutes"));
 app.use("/api/bills", require("./routes/billRoutes"));
+app.use("/api/expenses", require("./routes/expenseRoutes"));
 app.use("/api/revenue", require("./routes/revenueRoutes"));
 
 app.get("/api/health", (req, res) => {
