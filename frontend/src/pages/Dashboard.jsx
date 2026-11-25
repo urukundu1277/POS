@@ -207,25 +207,26 @@ export default function Dashboard() {
             </div>
 
             <div className="overflow-x-auto pb-2">
-              <div className="flex gap-2 min-w-fit">
-                {categoryList.map((cat) => {
-                  const active = selectedCategory === cat.id;
-                  return (
-                    <button
-                      key={cat.id}
-                      onClick={() => setSelectedCategory(cat.id)}
-                      className={`px-5 py-2 rounded-xl text-sm font-semibold border transition-all duration-200 ${
-                        active
-                          ? "bg-blue-700 border-blue-800 text-white shadow-md"
-                          : "bg-white border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-200"
-                      }`}
-                    >
-                      {cat.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+  <div className="flex gap-2 min-w-fit">
+    {categoryList.map((cat) => {
+      const active = selectedCategory === cat.id;
+
+      return (
+        <button
+          key={cat.id}
+          onClick={() => setSelectedCategory(cat.id)}
+          className={`px-5 py-2.5 rounded-xl text-sm font-semibold border transition-all duration-200 whitespace-nowrap ${
+  active
+    ? "bg-pink-500 border-pink-600 text-white shadow-md"
+    : "bg-pink-50 border-pink-200 text-pink-900 hover:bg-pink-100 hover:border-pink-400"
+}`}
+        >
+          {cat.name}
+        </button>
+      );
+    })}
+  </div>
+</div>
 
             <div className="mt-6">
               {filteredItems.length === 0 ? (
@@ -282,12 +283,10 @@ export default function Dashboard() {
                              <button
   onClick={() => addToCart(item, selectedSize, selectedSizePrice, 1)}
   disabled={!selectedSize}
-  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white font-semibold hover:bg-blue-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+  className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-pink-500 text-white hover:bg-pink-600 active:scale-95 transition-all duration-200 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+  title="Add to cart"
 >
-  <span className="text-xl font-bold leading-none" aria-hidden="true">
-    +
-  </span>
-  <span>Add</span>
+  <Plus className="w-5 h-5" strokeWidth={2.5} />
 </button>
                             </td>
                           </tr>
