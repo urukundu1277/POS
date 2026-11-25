@@ -1,107 +1,208 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ========================================
+   LIGHT PINK THEME
+======================================== */
+
 @layer base {
   :root {
-    --theme-bg: #FFFFFF;
-    --theme-bg-secondary: #F7F7F7;
+    --theme-bg: #FFF5F7;
+    --theme-bg-secondary: #FCE7EF;
     --theme-text: #1F2937;
     --theme-text-secondary: #6B7280;
-    --theme-border: #E5E7EB;
-    --theme-primary: #1F2937;
+    --theme-border: #F3D5DF;
+    --theme-primary: #DB2777;
     --theme-primary-text: #FFFFFF;
-    --theme-accent: #1F2937;
+    --theme-accent: #BE185D;
     --theme-surface: #FFFFFF;
     --theme-inverted: #1F2937;
+  }
+
+  * {
+    border-color: var(--theme-border);
   }
 
   body {
     background-color: var(--theme-bg);
     color: var(--theme-text);
+    font-family: inherit;
   }
 }
+
+/* ========================================
+   BUTTON COMPONENTS
+======================================== */
 
 @layer components {
   .btn {
     @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
   }
+
   .btn-primary {
     @apply btn;
-    background-color: #3b82f6;
-    color: #ffffff;
+    background-color: #DB2777;
+    color: #FFFFFF;
   }
+
   .btn-primary:hover {
-    background-color: #2563eb;
+    background-color: #BE185D;
   }
+
   .btn-secondary {
-    @apply btn bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-400;
+    @apply btn;
+    background-color: #FCE7EF;
+    color: #831843;
   }
+
+  .btn-secondary:hover {
+    background-color: #FBCFE8;
+  }
+
   .btn-success {
     @apply btn bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
   }
+
   .btn-danger {
     @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
   }
+
   .btn-warning {
     @apply btn bg-amber-500 text-white hover:bg-amber-600 focus:ring-amber-400;
   }
+
   .btn-outline {
-    @apply btn border border-gray-300 bg-white hover:bg-gray-50 focus:ring-gray-400;
+    @apply btn border hover:bg-pink-50 focus:ring-pink-300;
+    background-color: #FFFFFF;
+    color: #831843;
+    border-color: #F3D5DF;
   }
+
+  /* ========================================
+     INPUT COMPONENTS
+  ======================================== */
+
   .input {
-    @apply block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-[var(--theme-primary)];
+    @apply block w-full rounded-lg border bg-white px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-pink-500;
+    border-color: #F3D5DF;
   }
+
+  .input:focus {
+    --tw-ring-color: #DB2777;
+  }
+
   .select {
-    @apply block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-[var(--theme-primary)];
+    @apply block w-full rounded-lg border bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:border-pink-500;
+    border-color: #F3D5DF;
   }
+
+  .select:focus {
+    --tw-ring-color: #DB2777;
+  }
+
+  /* ========================================
+     CARD COMPONENTS
+  ======================================== */
+
   .card {
-    @apply bg-white rounded-xl border border-gray-200 shadow-sm;
+    @apply rounded-xl border bg-white shadow-sm;
+    border-color: #F3D5DF;
   }
+
+  /* ========================================
+     BADGES
+  ======================================== */
+
   .badge {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
   }
+
   .badge-active {
-    background-color: #3b82f6;
-    color: #ffffff;
+    background-color: #DB2777;
+    color: #FFFFFF;
   }
+
   .badge-inactive {
     @apply badge bg-red-100 text-red-800;
   }
 }
+
+/* ========================================
+   GLOBAL PINK THEME UTILITIES
+======================================== */
 
 @layer utilities {
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  .bg-theme {
+    background-color: var(--theme-bg);
+  }
+
+  .bg-theme-secondary {
+    background-color: var(--theme-bg-secondary);
+  }
+
+  .bg-theme-surface {
+    background-color: var(--theme-surface);
+  }
+
+  .text-theme {
+    color: var(--theme-text);
+  }
+
+  .text-theme-primary {
+    color: var(--theme-primary);
+  }
+
+  .border-theme {
+    border-color: var(--theme-border);
+  }
 }
+
+/* ========================================
+   PRINT STYLES
+======================================== */
 
 @media print {
   .no-print {
     display: none !important;
   }
+
   body {
     background: white !important;
+    color: black !important;
   }
+
   .receipt {
     width: 320px;
     margin: 0 auto;
-    background: white;
-    color: black;
+    background: white !important;
+    color: black !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+
   .receipt-80mm {
     width: 320px;
   }
+
   .receipt-58mm {
     width: 220px;
   }
 }
+
+/* ========================================
+   TOAST NOTIFICATIONS
+======================================== */
 
 #toast-container {
   position: fixed;
