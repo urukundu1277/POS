@@ -1,20 +1,28 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { lazy, Suspense } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Categories from "./pages/Categories";
-import MenuManagement from "./pages/MenuManagement";
-import SalesHistory from "./pages/SalesHistory";
-import BusinessProfile from "./pages/BusinessProfile";
-import BillPrint from "./pages/BillPrint";
-import SuperAdminLogin from "./pages/SuperAdminLogin";
-import SuperAdminDashboard from "./pages/SuperAdminDashboard";
-import RevenueAnalytics from "./pages/RevenueAnalytics";
-import Expenses from "./pages/Expenses";
 import { AuthProvider } from "./context/AuthContext";
+
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Categories = lazy(() => import("./pages/Categories"));
+const MenuManagement = lazy(() => import("./pages/MenuManagement"));
+const SalesHistory = lazy(() => import("./pages/SalesHistory"));
+const BusinessProfile = lazy(() => import("./pages/BusinessProfile"));
+const BillPrint = lazy(() => import("./pages/BillPrint"));
+const SuperAdminLogin = lazy(() => import("./pages/SuperAdminLogin"));
+const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
+const RevenueAnalytics = lazy(() => import("./pages/RevenueAnalytics"));
+const Expenses = lazy(() => import("./pages/Expenses"));
+
+const LazyComponent = ({ element }) => (
+  <Suspense fallback={<div className="flex h-full items-center justify-center">Loading...</div>}>
+    {element}
+  </Suspense>
+);
 
 function AppRoutes() {
   return (
@@ -33,79 +41,95 @@ function AppRoutes() {
         <Route
           path="/"
           element={
-            <ProtectedRoute>
-              <Navbar>
-                <Dashboard />
-              </Navbar>
-            </ProtectedRoute>
+            <LazyComponent element={
+              <ProtectedRoute>
+                <Navbar>
+                  <Dashboard />
+                </Navbar>
+              </ProtectedRoute>
+            } />
           }
         />
         <Route
           path="/categories"
           element={
-            <ProtectedRoute>
-              <Navbar>
-                <Categories />
-              </Navbar>
-            </ProtectedRoute>
+            <LazyComponent element={
+              <ProtectedRoute>
+                <Navbar>
+                  <Categories />
+                </Navbar>
+              </ProtectedRoute>
+            } />
           }
         />
         <Route
           path="/menu"
           element={
-            <ProtectedRoute>
-              <Navbar>
-                <MenuManagement />
-              </Navbar>
-            </ProtectedRoute>
+            <LazyComponent element={
+              <ProtectedRoute>
+                <Navbar>
+                  <MenuManagement />
+                </Navbar>
+              </ProtectedRoute>
+            } />
           }
         />
         <Route
           path="/sales"
           element={
-            <ProtectedRoute>
-              <Navbar>
-                <SalesHistory />
-              </Navbar>
-            </ProtectedRoute>
+            <LazyComponent element={
+              <ProtectedRoute>
+                <Navbar>
+                  <SalesHistory />
+                </Navbar>
+              </ProtectedRoute>
+            } />
           }
         />
         <Route
           path="/revenue"
           element={
-            <ProtectedRoute>
-              <Navbar>
-                <RevenueAnalytics />
-              </Navbar>
-            </ProtectedRoute>
+            <LazyComponent element={
+              <ProtectedRoute>
+                <Navbar>
+                  <RevenueAnalytics />
+                </Navbar>
+              </ProtectedRoute>
+            } />
           }
         />
         <Route
           path="/expenses"
           element={
-            <ProtectedRoute>
-              <Navbar>
-                <Expenses />
-              </Navbar>
-            </ProtectedRoute>
+            <LazyComponent element={
+              <ProtectedRoute>
+                <Navbar>
+                  <Expenses />
+                </Navbar>
+              </ProtectedRoute>
+            } />
           }
         />
         <Route
           path="/profile"
           element={
-            <ProtectedRoute>
-              <Navbar>
-                <BusinessProfile />
-              </Navbar>
-            </ProtectedRoute>
+            <LazyComponent element={
+              <ProtectedRoute>
+                <Navbar>
+                  <BusinessProfile />
+                </Navbar>
+              </ProtectedRoute>
+            } />
           }
         />
         <Route
           path="/bill/:id"
           element={
-            <ProtectedRoute>
-              <BillPrint />
-            </ProtectedRoute>
+            <LazyComponent element={
+              <ProtectedRoute>
+                <BillPrint />
+              </ProtectedRoute>
+            } />
           }
         />
       </Routes>
