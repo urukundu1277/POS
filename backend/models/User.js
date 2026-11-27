@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
     businessId: { type: mongoose.Schema.Types.ObjectId, ref: "Business", required: true },
     role: { type: String, enum: ["business_user"], default: "business_user" },
     status: { type: String, enum: ["active", "inactive"], default: "active" },
+    passwordChangedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );
@@ -16,6 +17,7 @@ const userSchema = new mongoose.Schema(
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
+  this.passwordChangedAt = new Date();
   next();
 });
 

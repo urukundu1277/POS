@@ -16,6 +16,7 @@ router.put("/businesses/:id", superAdminMiddleware, superAdminController.updateB
 router.patch("/businesses/:id/toggle-status", superAdminMiddleware, superAdminController.toggleBusinessStatus);
 router.delete("/businesses/:id", superAdminMiddleware, superAdminController.deleteBusiness);
 router.put("/users/:id/reset-password", superAdminMiddleware, superAdminController.resetUserPassword);
+router.get("/users/:id/sessions/count", superAdminMiddleware, superAdminController.getUserSessionCount);
 router.get("/stats", superAdminMiddleware, superAdminController.getSuperAdminStats);
 
 module.exports = router;

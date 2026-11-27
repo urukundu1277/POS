@@ -12,6 +12,7 @@ export default function SuperAdminDashboard() {
     totalUsers: 0,
   });
   const [businesses, setBusinesses] = useState([]);
+  const [sessionCounts, setSessionCounts] = useState({});
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
@@ -49,6 +50,21 @@ export default function SuperAdminDashboard() {
     try {
       const res = await adminApi.get("/admin/businesses");
       setBusinesses(res.data.businesses);
+      const counts = {};
+      await Promise.all(
+        (res.data.businesses || []).map(async (b) => {
+          const u = b.users && b.users.length > 0 ? b.users[0] : null;
+          if (u?._id) {
+            try {
+              const c = await adminApi.get(`/admin/users/${u._id}/sessions/count`);
+              counts[u._id] = c.data.count;
+            } catch {
+              counts[u._id] = 0;
+            }
+          }
+        })
+      );
+      setSessionCounts(counts);
     } catch (err) {
       toast.error("Failed to load businesses");
     } finally {
@@ -59,6 +75,8 @@ export default function SuperAdminDashboard() {
   useEffect(() => {
     loadStats();
     loadBusinesses();
+    const interval = setInterval(loadBusinesses, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleChange = (e) => {
@@ -131,6 +149,7 @@ export default function SuperAdminDashboard() {
       const userId = users[0]._id;
       await adminApi.put(`/admin/users/${userId}/reset-password`, { newPassword });
       toast.success("Password reset successfully.");
+      loadBusinesses();
     } catch (err) {
       toast.error("Failed to reset password: " + (err.response?.data?.message || "Unknown error"));
     }
@@ -360,6 +379,7 @@ export default function SuperAdminDashboard() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-6 border-b border-gray-200">
           <h3 className="text-lg font-bold text-gray-900">All Businesses</h3>
+          <button onClick={loadBusinesses} className="text-sm px-3 py-1 border rounded hover:bg-gray-50">Refresh</button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
@@ -371,14 +391,15 @@ export default function SuperAdminDashboard() {
                 <th className="px-4 py-3">Login Email</th>
                 <th className="px-4 py-3">Mobile</th>
                 <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Devices</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {loading ? (
-                <tr><td colSpan="7" className="p-4 text-center">Loading...</td></tr>
+                <tr><td colSpan="8" className="p-4 text-center">Loading...</td></tr>
               ) : businesses.length === 0 ? (
-                <tr><td colSpan="7" className="p-8 text-center text-gray-500">No businesses found.</td></tr>
+                <tr><td colSpan="8" className="p-8 text-center text-gray-500">No businesses found.</td></tr>
               ) : (
                 businesses.map((b) => {
                   const loginUser = b.users && b.users.length > 0 ? b.users[0] : null;
@@ -399,6 +420,9 @@ export default function SuperAdminDashboard() {
                         >
                           {b.status}
                         </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        {loginUser ? sessionCounts[loginUser._id] ?? 0 : "—"}
                       </td>
                       <td className="px-4 py-3 text-right">
                       <button

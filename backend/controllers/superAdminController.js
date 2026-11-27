@@ -1,6 +1,7 @@
 const SuperAdmin = require("../models/SuperAdmin");
 const Business = require("../models/Business");
 const User = require("../models/User");
+const Session = require("../models/Session");
 const jwt = require("jsonwebtoken");
 
 const generateSuperAdminToken = (id) => {
@@ -288,6 +289,7 @@ exports.resetUserPassword = async (req, res) => {
     user.password = newPassword;
     user.status = "active";
     await user.save();
+    await Session.deleteMany({ userId: user._id });
 
     res.json({ message: "Password reset successfully." });
   } catch (error) {
@@ -295,6 +297,14 @@ exports.resetUserPassword = async (req, res) => {
   }
 };
 
+exports.getUserSessionCount = async (req, res) => {
+  try {
+    const count = await Session.countDocuments({ userId: req.params.id });
+    res.json({ count });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 exports.getSuperAdminStats = async (req, res) => {
   try {
     const totalBusinesses = await Business.countDocuments();
